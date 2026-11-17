@@ -1,0 +1,18 @@
+# Dépendances (chacun les recrée avec "npm install")
+node_modules/
+
+# Secrets : JAMAIS dans git
+.env
+.env.*
+!.env.example
+
+# Fichiers système / éditeur
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Journaux et builds
+*.log
+dist/
+build/
+coverage/
