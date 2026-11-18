@@ -33,7 +33,8 @@ router.get("/health", function (req, res) {
 // fichier de routes existe)
 // ---------------------------------------------------------------------
 // Binôme 1 : utilisateurs, déclarations, sécurité
-// router.use("/auth", require("./auth.routes"));
+router.use("/auth", require("./authRoutes"));
+router.use("/users", require("./userRoutes"));
 // router.use("/declarations", require("./declarations.routes"));
 
 // Binôme 2 : recherche
