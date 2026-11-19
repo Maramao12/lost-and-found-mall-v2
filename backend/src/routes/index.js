@@ -24,7 +24,7 @@ router.get("/health", function (req, res) {
   res.json({
     success: true,
     status: "ok",
-    db: etats[mongoose.connection.readyState]
+    db: etats[mongoose.connection.readyState],
   });
 });
 
@@ -40,7 +40,7 @@ router.get("/health", function (req, res) {
 // router.use("/search", require("./search.routes"));
 
 // Binôme 3 : matching et correspondances
-// router.use("/correspondances", require("./matching.routes"));
+router.use("/correspondances", require("./matching.routes"));
 
 // Binôme 4 : administration, signalements, statistiques
 // router.use("/admin", require("./admin.routes"));

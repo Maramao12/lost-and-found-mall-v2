@@ -7,9 +7,14 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
-  "keywords": ["lost-and-found", "express", "mongodb"],
+  "keywords": [
+    "lost-and-found",
+    "express",
+    "mongodb"
+  ],
   "license": "ISC",
   "dependencies": {
+    "@xenova/transformers": "^2.17.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
