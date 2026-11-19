@@ -24,7 +24,7 @@ router.get("/health", function (req, res) {
   res.json({
     success: true,
     status: "ok",
-    db: etats[mongoose.connection.readyState]
+    db: etats[mongoose.connection.readyState],
   });
 });
 
@@ -35,7 +35,7 @@ router.get("/health", function (req, res) {
 // Binôme 1 : utilisateurs, déclarations, sécurité
 router.use("/auth", require("./authRoutes"));
 router.use("/users", require("./userRoutes"));
-// router.use("/declarations", require("./declarations.routes"));
+router.use("/declarations", require("./declarationRoutes"));
 
 // Binôme 2 : recherche
 // router.use("/search", require("./search.routes"));
