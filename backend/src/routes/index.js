@@ -43,6 +43,7 @@ router.get("/health", function (req, res) {
 router.use("/correspondances", require("./matching.routes"));
 
 // Binôme 4 : administration, signalements, statistiques
+router.use("/zones", require("./zoneRoutes"));
 // router.use("/admin", require("./admin.routes"));
 
 module.exports = router;
