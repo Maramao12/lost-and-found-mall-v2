@@ -44,6 +44,7 @@ router.use("/correspondances", require("./matching.routes"));
 
 // Binôme 4 : administration, signalements, statistiques
 router.use("/zones", require("./zoneRoutes"));
+router.use("/categories", require("./categorieRoutes"));
 // router.use("/admin", require("./admin.routes"));
 
 module.exports = router;
