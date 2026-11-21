@@ -56,7 +56,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nom\": \"Trabelsi\",\n  \"prenom\": \"Amine\",\n  \"email\": \"{{emailMembre}}\",\n  \"motDePasse\": \"{{mdpMembre}}\",\n  \"telephone\": \"22 333 444\"\n}",
+              "raw": "{\n  \"nom\": \"Trabelsi\",\n  \"prenom\": \"Islem\",\n  \"email\": \"{{emailMembre}}\",\n  \"motDePasse\": \"{{mdpMembre}}\",\n  \"telephone\": \"22 333 444\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -102,7 +102,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nom\": \"Trabelsi\",\n  \"prenom\": \"Amine\",\n  \"email\": \"{{emailMembre}}\",\n  \"motDePasse\": \"{{mdpMembre}}\"\n}",
+              "raw": "{\n  \"nom\": \"Trabelsi\",\n  \"prenom\": \"Islem\",\n  \"email\": \"{{emailMembre}}\",\n  \"motDePasse\": \"{{mdpMembre}}\",\n  \"telephone\": \"22 333 444\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1437,7 +1437,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000/api"
+      "value": "http://localhost:5000/api"
     },
     {
       "key": "adminEmail",
