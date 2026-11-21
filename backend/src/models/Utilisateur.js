@@ -26,11 +26,22 @@ const utilisateurSchema = new mongoose.Schema(
     telephone:    { type: String, trim: true },
     actif:        { type: Boolean, default: true },
     dateCreation: { type: Date, default: Date.now },
-    role:         { type: String, enum: ROLES, default: "MEMBRE" }
+    role:         { type: String, enum: ROLES, default: "MEMBRE" },
+
+    // AJOUT (sécurité) : date du dernier changement de mot de passe.
+    // Tout jeton JWT émis AVANT cette date est refusé (voir middlewares/auth.js).
+    dateChangementMdp: { type: Date }
   },
   {
     collection: "utilisateurs",   // même nom que dans le script
-    versionKey: false             // pas de champ __v
+    versionKey: false,            // pas de champ __v
+    toJSON: {
+      // Filet de sécurité : même juste après create(), le hash ne sort jamais en JSON.
+      transform: function (doc, ret) {
+        delete ret.motDePasseHash;
+        return ret;
+      }
+    }
   }
 );
 

@@ -134,6 +134,7 @@ lf.createCollection("zones", {
 // ---- 1.4 declarations -----------------------------------------------
 // Relations : auteurId (Membre "crée" Declaration),
 //             categorieId (appartient à), zoneId (concerne)
+// dateEvenement : date à laquelle l'objet a été perdu ou trouvé
 lf.createCollection("declarations", {
   validator: {
     $jsonSchema: {
@@ -147,11 +148,13 @@ lf.createCollection("declarations", {
         "categorieId",
         "zoneId",
         "dateCreation",
+        "dateEvenement",
       ],
       properties: {
         type: { enum: ["PERDU", "TROUVE"] }, // TypeDeclaration
         titre: { bsonType: "string", minLength: 3, maxLength: 120 },
         description: { bsonType: "string", minLength: 5 },
+        dateEvenement: { bsonType: "date" }, // date de perte / de découverte
         dateCreation: { bsonType: "date" },
         photoUrl: { bsonType: "string" }, // optionnel
         statut: { enum: ["PUBLIEE", "EN_COURS", "RESTITUEE", "SUPPRIMEE"] }, // StatutDeclaration
@@ -505,6 +508,7 @@ lf.declarations.insertMany([
     titre: "Sac à dos noir perdu",
     description:
       "Sac à dos noir de marque Nike contenant un ordinateur portable, perdu lundi près du food court.",
+    dateEvenement: jours(4), // perdu lundi
     dateCreation: jours(3),
     photoUrl: "https://exemple.tn/photos/sac1.jpg",
     statut: "PUBLIEE",
@@ -519,6 +523,7 @@ lf.declarations.insertMany([
     titre: "Sac noir trouvé",
     description:
       "Sac à dos noir trouvé mardi sur une chaise du food court, contient un ordinateur.",
+    dateEvenement: jours(3), // trouvé mardi
     dateCreation: jours(2),
     photoUrl: "https://exemple.tn/photos/sac2.jpg",
     statut: "PUBLIEE",
@@ -533,6 +538,7 @@ lf.declarations.insertMany([
     titre: "Téléphone Samsung perdu",
     description:
       "Samsung Galaxy bleu avec coque transparente perdu au parking.",
+    dateEvenement: jours(2),
     dateCreation: jours(1),
     statut: "PUBLIEE",
     dateModification: jours(1),
@@ -701,6 +707,7 @@ lf.declarations.insertOne({
   titre: "Clés de voiture trouvées",
   description:
     "Trousseau de clés avec porte-clés rouge trouvé près de l'entrée.",
+  dateEvenement: jours(1),
   dateCreation: new Date(),
   statut: "PUBLIEE",
   dateModification: new Date(),
