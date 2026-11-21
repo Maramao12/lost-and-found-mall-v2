@@ -46,6 +46,7 @@ router.use("/correspondances", require("./matching.routes"));
 router.use("/zones", require("./zoneRoutes"));
 router.use("/categories", require("./categorieRoutes"));
 router.use("/admin/stats", require("./adminStatsRoutes"));
+router.use("/admin/declarations", require("./adminDeclarationRoutes"));
 // router.use("/admin", require("./admin.routes"));
 
 module.exports = router;
