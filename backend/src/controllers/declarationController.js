@@ -2,19 +2,23 @@
    src/controllers/declarationController.js
    ---------------------------------------------------------------------
    Cycle de vie des déclarations (binôme 1).
- 
+
    RÈGLES MÉTIER (à justifier à la soutenance)
    -------------------------------------------
    Création       : tout utilisateur connecté. auteurId = utilisateur du
                     jeton, statut = PUBLIEE (jamais choisis par le client).
+                    dateEvenement (date de perte / de découverte) est
+                    obligatoire et ne peut pas être dans le futur.
    Consultation   : utilisateur connecté. Seuls nom/prénom de l'auteur sont
                     exposés (jamais email ni téléphone). Une déclaration
                     SUPPRIMEE n'est visible que par son auteur et un admin.
    Modification   : AUTEUR SEULEMENT (l'admin modère par suppression).
-                    - PUBLIEE   : titre, description, photo, catégorie, zone
+                    - PUBLIEE   : titre, description, dateEvenement, photo,
+                                  catégorie, zone
                     - EN_COURS  : description et photo seulement (une
                                   correspondance est en cours, on ne change
-                                  plus ce qui sert au matching)
+                                  plus ce qui sert au matching : titre,
+                                  date, catégorie, zone)
                     - RESTITUEE / SUPPRIMEE : plus modifiable
                     Le type (PERDU/TROUVE) n'est jamais modifiable.
    Suppression    : auteur ou admin, LOGIQUE (statut SUPPRIMEE).
@@ -47,7 +51,14 @@ const TRANSITIONS = {
 
 // Champs modifiables selon le statut courant
 const CHAMPS_MODIFIABLES = {
-  PUBLIEE: ["titre", "description", "photoUrl", "categorieId", "zoneId"],
+  PUBLIEE: [
+    "titre",
+    "description",
+    "dateEvenement",
+    "photoUrl",
+    "categorieId",
+    "zoneId",
+  ],
   EN_COURS: ["description", "photoUrl"],
 };
 
@@ -82,7 +93,15 @@ async function verifierCategorieEtZone(categorieId, zoneId) {
 // POST /api/declarations
 // ---------------------------------------------------------------------
 async function create(req, res) {
-  const { type, titre, description, categorieId, zoneId, photoUrl } = req.body;
+  const {
+    type,
+    titre,
+    description,
+    dateEvenement,
+    categorieId,
+    zoneId,
+    photoUrl,
+  } = req.body;
 
   await verifierCategorieEtZone(categorieId, zoneId);
 
@@ -90,6 +109,7 @@ async function create(req, res) {
     type: type,
     titre: titre,
     description: description,
+    dateEvenement: dateEvenement, // déjà converti en Date par Zod
     categorieId: categorieId,
     zoneId: zoneId,
     photoUrl: photoUrl || undefined,
@@ -207,9 +227,11 @@ async function update(req, res) {
 
   await verifierCategorieEtZone(req.body.categorieId, req.body.zoneId);
 
-  const { titre, description, photoUrl, categorieId, zoneId } = req.body;
+  const { titre, description, dateEvenement, photoUrl, categorieId, zoneId } =
+    req.body;
   if (titre !== undefined) declaration.titre = titre;
   if (description !== undefined) declaration.description = description;
+  if (dateEvenement !== undefined) declaration.dateEvenement = dateEvenement;
   if (photoUrl !== undefined) declaration.photoUrl = photoUrl || undefined; // "" efface la photo
   if (categorieId !== undefined) declaration.categorieId = categorieId;
   if (zoneId !== undefined) declaration.zoneId = zoneId;

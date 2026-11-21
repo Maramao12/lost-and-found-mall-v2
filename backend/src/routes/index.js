@@ -36,6 +36,8 @@ router.get("/health", function (req, res) {
 router.use("/auth", require("./authRoutes"));
 router.use("/users", require("./userRoutes"));
 router.use("/declarations", require("./declarationRoutes"));
+router.use("/categories", require("./categorieRoutes"));
+router.use("/zones", require("./zoneRoutes"));
 
 // Binôme 2 : recherche
 // router.use("/search", require("./search.routes"));
