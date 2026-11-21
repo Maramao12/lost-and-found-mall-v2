@@ -40,7 +40,7 @@ router.use("/categories", require("./categorieRoutes"));
 router.use("/zones", require("./zoneRoutes"));
 
 // Binôme 2 : recherche
-// router.use("/search", require("./search.routes"));
+router.use("/search", require("./search.routes"));
 
 // Binôme 3 : matching et correspondances
 router.use("/correspondances", require("./matching.routes"));
