@@ -361,11 +361,25 @@ lf.declarations.createIndex(
     name: "idx_texte",
   },
 );
-// Recherche combinée : type + statut + zone + catégorie + tri par date
+// Recherche administrative (search.service.js) : égalités, puis tri, puis _id (départage)
 lf.declarations.createIndex(
-  { type: 1, statut: 1, zoneId: 1, categorieId: 1, dateCreation: -1 },
-  { name: "idx_recherche" },
+  { type: 1, statut: 1, zoneId: 1, categorieId: 1, dateCreation: -1, _id: -1 },
+  { name: "idx_recherche_creation" },
 );
+lf.declarations.createIndex(
+  { type: 1, statut: 1, zoneId: 1, categorieId: 1, dateEvenement: -1, _id: -1 },
+  { name: "idx_recherche_evenement" },
+);
+// Tri seul (sans filtre) et filtre de période sur la date de l'événement
+lf.declarations.createIndex(
+  { dateCreation: -1, _id: -1 },
+  { name: "idx_tri_creation" },
+);
+lf.declarations.createIndex(
+  { dateEvenement: -1, _id: -1 },
+  { name: "idx_tri_evenement" },
+);
+
 // "Mes déclarations"
 lf.declarations.createIndex(
   { auteurId: 1, dateCreation: -1 },
