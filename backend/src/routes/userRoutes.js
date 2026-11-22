@@ -19,17 +19,20 @@ const router = express.Router();
 router.use(authenticate);
 
 // ----- Profil (membre ou admin) -----
-router.get("/me", controller.getMe);
+router.get("/me", asyncHandler(controller.getMe));
+
 router.patch(
   "/me",
   validate(schemas.updateProfileSchema),
   asyncHandler(controller.updateMe),
 );
+
 router.patch(
   "/me/password",
   validate(schemas.changePasswordSchema),
   asyncHandler(controller.changePassword),
 );
+
 router.delete(
   "/me",
   validate(schemas.deleteAccountSchema),
@@ -44,22 +47,26 @@ router.get(
   validate(schemas.listQuerySchema, "query"),
   asyncHandler(controller.list),
 );
+
 router.post(
   "/",
   validate(schemas.adminCreateSchema),
   asyncHandler(controller.create),
 );
+
 router.get(
   "/:id",
   validate(schemas.idParamsSchema, "params"),
   asyncHandler(controller.getOne),
 );
+
 router.patch(
   "/:id",
   validate(schemas.idParamsSchema, "params"),
   validate(schemas.adminUpdateSchema),
   asyncHandler(controller.update),
 );
+
 router.delete(
   "/:id",
   validate(schemas.idParamsSchema, "params"),

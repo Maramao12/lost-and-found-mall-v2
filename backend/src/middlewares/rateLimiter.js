@@ -12,7 +12,10 @@ function reponse429(message) {
   return function (req, res) {
     res.status(429).json({
       success: false,
-      error: { code: "TOO_MANY_REQUESTS", message: message },
+      error: {
+        code: "TOO_MANY_REQUESTS",
+        message: message,
+      },
     });
   };
 }

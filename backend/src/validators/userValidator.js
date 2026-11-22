@@ -1,12 +1,3 @@
-/* =====================================================================
-   src/validators/utilisateur.validator.js
-   ---------------------------------------------------------------------
-   Schémas Zod du domaine "utilisateurs". Utilisés avec le middleware
-   validate(schema) : le contrôleur reçoit des données propres.
-   .strict() = toute clé inconnue est REFUSÉE (ex : un client qui envoie
-   "role": "ADMIN" à l'inscription reçoit une erreur 400).
-   ===================================================================== */
-
 const { z } = require("zod");
 const { ROLES } = require("../constants/enums");
 

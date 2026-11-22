@@ -49,3 +49,7 @@ const updateZoneSchema = z
 const idParamsSchema = z.object({ id: objectId });
 
 module.exports = { createZoneSchema, updateZoneSchema, idParamsSchema };
+<<<<<<< HEAD
+=======
+
+>>>>>>> a671351b03fd08959bf9d75fa9670ab1494906a5

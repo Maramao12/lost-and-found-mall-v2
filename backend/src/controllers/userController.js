@@ -1,10 +1,10 @@
 /* =====================================================================
    src/controllers/users.controller.js
    ---------------------------------------------------------------------
-   A) PROFIL de l'utilisateur connecté   (/api/users/me...)
+   A) PROFIL de l'utilisateur connecté (/api/users/me...)
    B) GESTION des utilisateurs par l'ADMIN (/api/users...)
 
-   Suppression = désactivation (actif:false), JAMAIS d'effacement :
+   Suppression = désactivation (actif:false), jamais d'effacement :
    les déclarations, messages et correspondances liés restent cohérents.
    ===================================================================== */
 
@@ -27,6 +27,7 @@ async function verifierPasDernierAdmin(cible) {
       actif: true,
       _id: { $ne: cible._id },
     });
+
     if (autres === 0) {
       throw new AppError(
         409,
@@ -39,12 +40,15 @@ async function verifierPasDernierAdmin(cible) {
 
 async function chargerUtilisateur(id) {
   const utilisateur = await Utilisateur.findById(id);
-  if (!utilisateur)
+
+  if (!utilisateur) {
     throw new AppError(404, "USER_NOT_FOUND", "Utilisateur introuvable");
+  }
+
   return utilisateur;
 }
 
-// Échappe les caractères spéciaux pour une recherche texte sûre
+// Échappe les caractères spéciaux pour une recherche texte sûre.
 function echapperRegex(texte) {
   return texte.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -55,20 +59,31 @@ function echapperRegex(texte) {
 
 // GET /api/users/me
 function getMe(req, res) {
-  res.json({ success: true, data: { user: req.user } });
+  res.json({
+    success: true,
+    data: { user: req.user },
+  });
 }
 
-// PATCH /api/users/me  -> nom, prenom, telephone ("" efface le téléphone)
+// PATCH /api/users/me
+// Modifie nom, prenom et telephone.
+// Une chaîne vide efface le téléphone.
 async function updateMe(req, res) {
   const utilisateur = req.user;
   const { nom, prenom, telephone } = req.body;
 
   if (nom !== undefined) utilisateur.nom = nom;
   if (prenom !== undefined) utilisateur.prenom = prenom;
-  if (telephone !== undefined) utilisateur.telephone = telephone || undefined;
+  if (telephone !== undefined) {
+    utilisateur.telephone = telephone || undefined;
+  }
 
   await utilisateur.save();
-  res.json({ success: true, data: { user: utilisateur } });
+
+  res.json({
+    success: true,
+    data: { user: utilisateur },
+  });
 }
 
 // PATCH /api/users/me/password
@@ -78,6 +93,7 @@ async function changePassword(req, res) {
   const utilisateur = await Utilisateur.findById(req.user._id).select(
     "+motDePasseHash",
   );
+
   if (!(await bcrypt.compare(motDePasseActuel, utilisateur.motDePasseHash))) {
     throw new AppError(
       401,
@@ -90,17 +106,25 @@ async function changePassword(req, res) {
     nouveauMotDePasse,
     BCRYPT_COST,
   );
-  utilisateur.dateChangementMdp = new Date(); // invalide les anciens jetons
+
+  utilisateur.dateChangementMdp = new Date();
+
   await utilisateur.save();
 
-  // Nouveau jeton : la session courante continue, les autres appareils sont déconnectés
+  // La session courante continue ; les autres jetons sont invalidés
+  // si le middleware JWT vérifie dateChangementMdp.
   res.json({
     success: true,
-    data: { message: "Mot de passe modifié", token: signToken(utilisateur) },
+    data: {
+      message: "Mot de passe modifié",
+      token: signToken(utilisateur),
+    },
   });
 }
 
-// DELETE /api/users/me  (body : { motDePasse }) -> désactive son propre compte
+// DELETE /api/users/me
+// Body : { motDePasse }
+// Désactive le compte de l'utilisateur connecté.
 async function deleteMe(req, res) {
   const utilisateur = await Utilisateur.findById(req.user._id).select(
     "+motDePasseHash",
@@ -111,18 +135,23 @@ async function deleteMe(req, res) {
   ) {
     throw new AppError(401, "INVALID_CREDENTIALS", "Mot de passe incorrect");
   }
+
   await verifierPasDernierAdmin(utilisateur);
 
   utilisateur.actif = false;
   await utilisateur.save();
 
-  // NOTE : le sort des déclarations de ce membre (masquées, archivées...)
-  // est décidé par le binôme "déclarations".
-  res.json({ success: true, data: { message: "Compte désactivé" } });
+  // Le traitement des déclarations reste à la charge du module
+  // responsable des déclarations.
+  res.json({
+    success: true,
+    data: { message: "Compte désactivé" },
+  });
 }
 
 // ---------------------------------------------------------------------
-// B) ADMINISTRATION (routes protégées par authorize("ADMIN"))
+// B) ADMINISTRATION
+// Routes protégées par authorize("ADMIN")
 // ---------------------------------------------------------------------
 
 // GET /api/users?page=1&limit=10&role=MEMBRE&actif=true&q=texte
@@ -130,8 +159,15 @@ async function list(req, res) {
   const { page, limit, role, actif, q } = req.query;
 
   const filtre = {};
-  if (role) filtre.role = role;
-  if (actif !== undefined) filtre.actif = actif;
+
+  if (role) {
+    filtre.role = role;
+  }
+
+  if (actif !== undefined) {
+    filtre.actif = actif;
+  }
+
   if (q) {
     const motif = new RegExp(echapperRegex(q), "i");
     filtre.$or = [{ nom: motif }, { prenom: motif }, { email: motif }];
@@ -142,6 +178,7 @@ async function list(req, res) {
       .sort({ dateCreation: -1 })
       .skip((page - 1) * limit)
       .limit(limit),
+
     Utilisateur.countDocuments(filtre),
   ]);
 
@@ -157,7 +194,8 @@ async function list(req, res) {
   });
 }
 
-// POST /api/users  -> l'admin crée un compte (MEMBRE ou ADMIN)
+// POST /api/users
+// L'admin crée un compte MEMBRE ou ADMIN.
 async function create(req, res) {
   const { nom, prenom, email, motDePasse, telephone, role } = req.body;
 
@@ -179,25 +217,36 @@ async function create(req, res) {
     actif: true,
   });
 
-  res.status(201).json({ success: true, data: { user: utilisateur } });
+  res.status(201).json({
+    success: true,
+    data: { user: utilisateur },
+  });
 }
 
 // GET /api/users/:id
 async function getOne(req, res) {
   const utilisateur = await chargerUtilisateur(req.params.id);
-  res.json({ success: true, data: { user: utilisateur } });
+
+  res.json({
+    success: true,
+    data: { user: utilisateur },
+  });
 }
 
 // PATCH /api/users/:id
 async function update(req, res) {
   const utilisateur = await chargerUtilisateur(req.params.id);
+
   const { nom, prenom, email, telephone, role, actif, motDePasse } = req.body;
 
   const estSoiMeme = String(utilisateur._id) === String(req.user._id);
+
   const changeRole = role !== undefined && role !== utilisateur.role;
+
   const desactive = actif === false && utilisateur.actif;
 
-  // Un admin ne peut pas se retirer ses propres droits (risque de se bloquer)
+  // Un administrateur ne peut pas modifier son propre rôle
+  // ni désactiver son propre compte via cette route.
   if (estSoiMeme && (changeRole || desactive)) {
     throw new AppError(
       409,
@@ -205,7 +254,8 @@ async function update(req, res) {
       "Vous ne pouvez pas modifier votre propre rôle ni désactiver votre propre compte",
     );
   }
-  // Ni retirer le dernier administrateur actif
+
+  // Empêche de retirer les droits du dernier administrateur actif.
   if (
     utilisateur.role === "ADMIN" &&
     utilisateur.actif &&
@@ -217,19 +267,31 @@ async function update(req, res) {
   if (nom !== undefined) utilisateur.nom = nom;
   if (prenom !== undefined) utilisateur.prenom = prenom;
   if (email !== undefined) utilisateur.email = email;
-  if (telephone !== undefined) utilisateur.telephone = telephone || undefined;
+
+  if (telephone !== undefined) {
+    utilisateur.telephone = telephone || undefined;
+  }
+
   if (role !== undefined) utilisateur.role = role;
   if (actif !== undefined) utilisateur.actif = actif;
+
   if (motDePasse !== undefined) {
     utilisateur.motDePasseHash = await bcrypt.hash(motDePasse, BCRYPT_COST);
+
     utilisateur.dateChangementMdp = new Date();
   }
 
-  await utilisateur.save(); // email déjà pris -> 409 (index unique)
-  res.json({ success: true, data: { user: utilisateur } });
+  // L'index unique du modèle doit empêcher les emails en double.
+  await utilisateur.save();
+
+  res.json({
+    success: true,
+    data: { user: utilisateur },
+  });
 }
 
-// DELETE /api/users/:id  -> désactivation (suppression logique)
+// DELETE /api/users/:id
+// Désactivation logique, sans suppression physique.
 async function remove(req, res) {
   const utilisateur = await chargerUtilisateur(req.params.id);
 
@@ -240,13 +302,18 @@ async function remove(req, res) {
       "Utilisez DELETE /api/users/me pour désactiver votre propre compte",
     );
   }
+
   await verifierPasDernierAdmin(utilisateur);
 
   utilisateur.actif = false;
   await utilisateur.save();
+
   res.json({
     success: true,
-    data: { message: "Utilisateur désactivé", user: utilisateur },
+    data: {
+      message: "Utilisateur désactivé",
+      user: utilisateur,
+    },
   });
 }
 

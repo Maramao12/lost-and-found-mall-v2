@@ -19,12 +19,14 @@ router.post(
   validate(registerSchema),
   asyncHandler(controller.register),
 );
+
 router.post(
   "/login",
   authLimiter,
   validate(loginSchema),
   asyncHandler(controller.login),
 );
+
 router.get("/me", authenticate, controller.me);
 
 module.exports = router;
