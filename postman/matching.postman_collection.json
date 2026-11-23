@@ -1,0 +1,280 @@
+{
+  "info": {
+    "name": "Lost & Found – Binôme 3 : Matching IA & Correspondances",
+    "description": "Tests complets du module Matching IA et du cycle de vérification des correspondances (preuve, question/réponse, acceptation, restitution, refus et sécurité).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api", "type": "string" },
+    { "key": "tokenProprietaire", "value": "", "type": "string" },
+    { "key": "tokenTrouveur", "value": "", "type": "string" },
+    { "key": "tokenIntrus", "value": "", "type": "string" },
+    { "key": "declarationPerdueId", "value": "", "type": "string" },
+    { "key": "declarationTrouveeId", "value": "", "type": "string" },
+    { "key": "correspondanceId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1 - IA & Consultation des correspondances",
+      "item": [
+        {
+          "name": "1. Lancer l'analyse IA manuellement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/analyser/{{declarationPerdueId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "analyser", "{{declarationPerdueId}}"]
+            }
+          }
+        },
+        {
+          "name": "2. Lister les correspondances d'une déclaration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const list = Array.isArray(json.data)",
+                  "  ? json.data",
+                  "  : (json.data && json.data.correspondances) || json.correspondances || [];",
+                  "if (list.length > 0 && list[0]._id) {",
+                  "  pm.collectionVariables.set('correspondanceId', list[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/declaration/{{declarationPerdueId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "declaration", "{{declarationPerdueId}}"]
+            }
+          }
+        },
+        {
+          "name": "3. Consulter le détail d'une correspondance",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Vérification & Preuves (Parcours complet)",
+      "item": [
+        {
+          "name": "1. Envoyer une preuve de propriété (Propriétaire)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preuveProprietaire\": \"Il y a un porte-clés rouge et un cahier bleu à l'intérieur\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/preuve",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "preuve"]
+            }
+          }
+        },
+        {
+          "name": "2. Demander une vérification complémentaire (Trouveur)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenTrouveur}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionVerification\": \"Quelle est la couleur de la trousse dans la poche avant ?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/demander-verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "demander-verification"]
+            }
+          }
+        },
+        {
+          "name": "3. Répondre à la question de vérification (Propriétaire)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reponseVerification\": \"La trousse est noire avec un logo blanc\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/repondre",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "repondre"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Décision & Restitution",
+      "item": [
+        {
+          "name": "1. Accepter la correspondance",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenTrouveur}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/accepter",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "accepter"]
+            }
+          }
+        },
+        {
+          "name": "2. Confirmer la restitution physique",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/restituer",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "restituer"]
+            }
+          }
+        },
+        {
+          "name": "3. Refuser une correspondance (Cas alternatif)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenTrouveur}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motifRefus\": \"La description de la preuve ne correspond pas à l'objet trouvé\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/refuser",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "refuser"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Tests d'erreurs & Sécurité (400 / 401 / 403)",
+      "item": [
+        {
+          "name": "1. Consulter sans token (401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}"]
+            }
+          }
+        },
+        {
+          "name": "2. Accès par un tiers non concerné (403)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenIntrus}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}"]
+            }
+          }
+        },
+        {
+          "name": "3. Preuve trop courte – Validation Zod (400)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preuveProprietaire\": \"ab\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/{{correspondanceId}}/preuve",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "{{correspondanceId}}", "preuve"]
+            }
+          }
+        },
+        {
+          "name": "4. ID MongoDB invalide (400)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenProprietaire}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/correspondances/123-invalide",
+              "host": ["{{baseUrl}}"],
+              "path": ["correspondances", "123-invalide"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

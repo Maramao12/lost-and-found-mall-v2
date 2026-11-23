@@ -4,6 +4,7 @@
      - declarationPerdueId / declarationTrouveeId -> Declaration
      - analyseId : une analyse propose 0..* correspondances, une
        correspondance est le résultat d'UNE seule analyse
+   Champs de vérification : preuve privée, question/réponse, motif de refus
    ===================================================================== */
 
 const mongoose = require("mongoose");
@@ -29,6 +30,10 @@ const correspondanceSchema = new mongoose.Schema(
 
     scoreGlobal: { type: Number, required: true, min: 0, max: 1 },
     statut: { type: String, enum: STATUT_CORRESPONDANCE, default: "PROPOSEE" },
+    preuveProprietaire: { type: String, trim: true },
+    questionVerification: { type: String, trim: true },
+    reponseVerification: { type: String, trim: true },
+    motifRefus: { type: String, trim: true },
     dateCreation: { type: Date, default: Date.now },
     dateMiseAJour: { type: Date, default: Date.now },
   },

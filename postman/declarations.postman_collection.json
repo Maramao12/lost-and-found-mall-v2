@@ -1,0 +1,3337 @@
+{
+  "info": {
+    "_postman_id": "cfdaa0db-7c5b-4e86-b692-f5620b77cb20",
+    "name": "Lost & Found – Binôme 1 : Déclarations, catégories et zones",
+    "description": "Prérequis : serveur lancé (npm run dev) et comptes créés avec npm run create-user (admin, amine, sarra). Exécutez les dossiers dans l'ordre (Collection Runner), en commençant par 0 - Préparation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39195980"
+  },
+  "item": [
+    {
+      "name": "0 - Préparation (connexions, catégorie et zone)",
+      "item": [
+        {
+          "name": "1. Connexion Amine (membre A)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenAmine\", j.data.token);",
+                  "pm.test(\"Rôle MEMBRE\", function () { pm.expect(j.data.user.role).to.eql(\"MEMBRE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailAmine}}\",\n  \"motDePasse\": \"{{mdpMembre}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Connexion Sarra (membre B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenSarra\", j.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailSarra}}\",\n  \"motDePasse\": \"{{mdpMembre}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Connexion admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenAdmin\", j.data.token);",
+                  "pm.test(\"Rôle ADMIN\", function () { pm.expect(j.data.user.role).to.eql(\"ADMIN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"motDePasse\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Lister les catégories (récupère categorieId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Liste non vide\", function () { pm.expect(j.data.length).to.be.above(0); });",
+                  "pm.collectionVariables.set(\"categorieId\", j.data[0]._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Lister les zones (récupère zoneId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Liste non vide\", function () { pm.expect(j.data.length).to.be.above(0); });",
+                  "pm.collectionVariables.set(\"zoneId\", j.data[0]._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1 - Création",
+      "item": [
+        {
+          "name": "1. Créer une déclaration PERDU (Amine)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "var d = pm.response.json().data.declaration;",
+                  "pm.test(\"Statut PUBLIEE\", function () { pm.expect(d.statut).to.eql(\"PUBLIEE\"); });",
+                  "pm.test(\"dateEvenement présente\", function () { pm.expect(d).to.have.property(\"dateEvenement\"); });",
+                  "pm.collectionVariables.set(\"declarationId\", d._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Créer une déclaration TROUVE (Sarra)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"declarationIdSarra\", pm.response.json().data.declaration._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TROUVE\",\n  \"titre\": \"Sac noir trouvé\",\n  \"description\": \"Sac noir trouvé sur une chaise du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Champ interdit (auteurId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\",\n  \"auteurId\": \"000000000000000000000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Champ interdit (statut)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\",\n  \"statut\": \"RESTITUEE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. dateEvenement absente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. dateEvenement dans le futur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateFutur}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. dateEvenement invalide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"pas une date\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Titre trop court",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"ab\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Catégorie inexistante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"error.code = CATEGORY_NOT_FOUND\", function () { pm.expect(pm.response.json().error.code).to.eql(\"CATEGORY_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"000000000000000000000000\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Zone inexistante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"error.code = ZONE_NOT_FOUND\", function () { pm.expect(pm.response.json().error.code).to.eql(\"ZONE_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"000000000000000000000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Sans jeton",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"error.code = UNAUTHENTICATED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"UNAUTHENTICATED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Sac à dos noir\",\n  \"description\": \"Sac Nike noir perdu près du food court\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2 - Consultation",
+      "item": [
+        {
+          "name": "1. Mes déclarations (paginées)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Pagination présente\", function () { pm.expect(j.pagination).to.have.property(\"total\"); });",
+                  "pm.test(\"Contient ma déclaration\", function () { pm.expect(j.data.some(function (d) { return d._id === pm.collectionVariables.get(\"declarationId\"); })).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/me?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Mes déclarations : filtre type=TROUVE (aucune pour Amine)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Aucune déclaration TROUVE\", function () { pm.expect(pm.response.json().data.length).to.eql(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/me?type=TROUVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "TROUVE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Mes déclarations : limit trop grand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/me?limit=500",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "500"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Détail d'une déclaration (autre membre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var d = pm.response.json().data.declaration;",
+                  "pm.test(\"Email de l'auteur masqué\", function () { pm.expect(d.auteurId).to.not.have.property(\"email\"); pm.expect(d.auteurId).to.not.have.property(\"telephone\"); });",
+                  "pm.test(\"Catégorie et zone peuplées\", function () { pm.expect(d.categorieId).to.have.property(\"nom\"); pm.expect(d.zoneId).to.have.property(\"nom\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Détail : identifiant invalide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "abc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Détail : identifiant inexistant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"error.code = DECLARATION_NOT_FOUND\", function () { pm.expect(pm.response.json().error.code).to.eql(\"DECLARATION_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "000000000000000000000000"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Détail sans jeton",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"error.code = UNAUTHENTICATED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"UNAUTHENTICATED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3 - Modification",
+      "item": [
+        {
+          "name": "1. Modifier le titre (auteur)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Titre modifié\", function () { pm.expect(pm.response.json().data.declaration.titre).to.eql(\"Sac à dos noir Nike\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Sac à dos noir Nike\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Modifier dateEvenement (statut PUBLIEE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateEvenement\": \"{{dateEvt}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Modifier par un autre membre (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"error.code = FORBIDDEN\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Titre pirate\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Champ interdit : type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TROUVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Corps vide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. dateEvenement dans le futur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateEvenement\": \"{{dateFutur}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4 - Changement de statut",
+      "item": [
+        {
+          "name": "1. PUBLIEE -> EN_COURS (auteur)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Statut EN_COURS\", function () { pm.expect(pm.response.json().data.declaration.statut).to.eql(\"EN_COURS\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"EN_COURS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}",
+                "statut"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. EN_COURS : modifier le titre (verrouillé)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = FIELD_LOCKED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FIELD_LOCKED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Nouveau titre\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. EN_COURS : modifier la date (verrouillée)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = FIELD_LOCKED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FIELD_LOCKED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateEvenement\": \"{{dateEvt}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. EN_COURS : modifier la description (autorisé)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Sac Nike noir avec autocollant bleu\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. EN_COURS : suppression refusée",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = DECLARATION_IN_PROGRESS\", function () { pm.expect(pm.response.json().error.code).to.eql(\"DECLARATION_IN_PROGRESS\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Même statut",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = SAME_STATUS\", function () { pm.expect(pm.response.json().error.code).to.eql(\"SAME_STATUS\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"EN_COURS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}",
+                "statut"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Statut SUPPRIMEE refusé ici",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"SUPPRIMEE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}",
+                "statut"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Changer le statut par un autre membre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"error.code = FORBIDDEN\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"RESTITUEE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}",
+                "statut"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. EN_COURS -> RESTITUEE (auteur)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Statut RESTITUEE\", function () { pm.expect(pm.response.json().data.declaration.statut).to.eql(\"RESTITUEE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"RESTITUEE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}",
+                "statut"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. RESTITUEE : transition interdite",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = INVALID_TRANSITION\", function () { pm.expect(pm.response.json().error.code).to.eql(\"INVALID_TRANSITION\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"PUBLIEE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}",
+                "statut"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. RESTITUEE : modification interdite",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = DECLARATION_LOCKED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"DECLARATION_LOCKED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Nouvelle description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. RESTITUEE : suppression refusée",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = DECLARATION_RESTITUTED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"DECLARATION_RESTITUTED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5 - Suppression",
+      "item": [
+        {
+          "name": "1. Créer une déclaration à supprimer (Amine)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"declarationId2\", pm.response.json().data.declaration._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PERDU\",\n  \"titre\": \"Clés à supprimer\",\n  \"description\": \"Trousseau de clés à supprimer par l'admin\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Suppression par un autre membre (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"error.code = FORBIDDEN\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Admin sans motif (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = REASON_REQUIRED\", function () { pm.expect(pm.response.json().error.code).to.eql(\"REASON_REQUIRED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Admin : motif trop court (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error.code = VALIDATION_ERROR\", function () { pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motif\": \"court\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Admin avec motif valide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Statut SUPPRIMEE\", function () { pm.expect(pm.response.json().data.declaration.statut).to.eql(\"SUPPRIMEE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motif\": \"Contenu inapproprié signalé par plusieurs membres\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Déclaration supprimée : invisible pour un autre membre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"error.code = DECLARATION_NOT_FOUND\", function () { pm.expect(pm.response.json().error.code).to.eql(\"DECLARATION_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Déclaration supprimée : visible pour l'auteur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Déclaration supprimée : n'apparaît plus dans mes déclarations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Absente de la liste\", function () { pm.expect(pm.response.json().data.some(function (d) { return d._id === pm.collectionVariables.get(\"declarationId2\"); })).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/me?limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Supprimer deux fois (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"error.code = DECLARATION_NOT_FOUND\", function () { pm.expect(pm.response.json().error.code).to.eql(\"DECLARATION_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Créer une déclaration que l'auteur supprime",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"declarationId3\", pm.response.json().data.declaration._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TROUVE\",\n  \"titre\": \"Parapluie trouvé\",\n  \"description\": \"Parapluie noir trouvé à l'entrée\",\n  \"dateEvenement\": \"{{dateEvt}}\",\n  \"categorieId\": \"{{categorieId}}\",\n  \"zoneId\": \"{{zoneId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Suppression par l'auteur (sans motif)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Statut SUPPRIMEE\", function () { pm.expect(pm.response.json().data.declaration.statut).to.eql(\"SUPPRIMEE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/declarations/{{declarationId3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "declarations",
+                "{{declarationId3}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6 - Catégories et zones (ADMIN)",
+      "item": [
+        {
+          "name": "1. Membre : créer une catégorie (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"error.code = FORBIDDEN\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Interdit\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Admin : créer une catégorie",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"nomCategorieTest\", \"Test \" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"categorieTestId\", pm.response.json().data.categorie._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"{{nomCategorieTest}}\",\n  \"description\": \"Catégorie de test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Admin : nom déjà utilisé (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = CATEGORY_ALREADY_EXISTS\", function () { pm.expect(pm.response.json().error.code).to.eql(\"CATEGORY_ALREADY_EXISTS\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"{{nomCategorieTest}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Admin : modifier la catégorie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Description modifiée\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categorieTestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                "{{categorieTestId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Membre : consulter une catégorie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categorieTestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                "{{categorieTestId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Admin : supprimer la catégorie inutilisée",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categorieTestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                "{{categorieTestId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Admin : supprimer une catégorie utilisée (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = CATEGORY_IN_USE\", function () { pm.expect(pm.response.json().error.code).to.eql(\"CATEGORY_IN_USE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categorieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                "{{categorieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Membre : créer une zone (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"error.code = FORBIDDEN\", function () { pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Interdit\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Admin : créer une zone",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"nomZoneTest\", \"Zone test \" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"zoneTestId\", pm.response.json().data.zone._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"{{nomZoneTest}}\",\n  \"description\": \"Zone de test\",\n  \"emplacement\": \"Niveau 9\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Admin : zone déjà existante (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = ZONE_ALREADY_EXISTS\", function () { pm.expect(pm.response.json().error.code).to.eql(\"ZONE_ALREADY_EXISTS\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"{{nomZoneTest}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Admin : modifier la zone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emplacement\": \"Niveau 9, aile est\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/zones/{{zoneTestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones",
+                "{{zoneTestId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. Admin : supprimer la zone inutilisée",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zones/{{zoneTestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones",
+                "{{zoneTestId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13. Admin : supprimer une zone utilisée (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error.code = ZONE_IN_USE\", function () { pm.expect(pm.response.json().error.code).to.eql(\"ZONE_IN_USE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zones/{{zoneId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones",
+                "{{zoneId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "var jour = 24 * 3600 * 1000;",
+          "pm.collectionVariables.set(\"dateEvt\", new Date(Date.now() - 2 * jour).toISOString().slice(0, 10));",
+          "pm.collectionVariables.set(\"dateFutur\", new Date(Date.now() + 30 * jour).toISOString().slice(0, 10));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "emailAmine",
+      "value": "amine@mail.tn"
+    },
+    {
+      "key": "emailSarra",
+      "value": "sarra@mail.tn"
+    },
+    {
+      "key": "mdpMembre",
+      "value": "Membre12345"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@lostfound.tn"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin12345"
+    },
+    {
+      "key": "tokenAmine",
+      "value": ""
+    },
+    {
+      "key": "tokenSarra",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "categorieId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "declarationId",
+      "value": ""
+    },
+    {
+      "key": "declarationId2",
+      "value": ""
+    },
+    {
+      "key": "declarationId3",
+      "value": ""
+    },
+    {
+      "key": "declarationIdSarra",
+      "value": ""
+    },
+    {
+      "key": "categorieTestId",
+      "value": ""
+    },
+    {
+      "key": "zoneTestId",
+      "value": ""
+    },
+    {
+      "key": "nomCategorieTest",
+      "value": ""
+    },
+    {
+      "key": "nomZoneTest",
+      "value": ""
+    },
+    {
+      "key": "dateEvt",
+      "value": ""
+    },
+    {
+      "key": "dateFutur",
+      "value": ""
+    }
+  ]
+}
