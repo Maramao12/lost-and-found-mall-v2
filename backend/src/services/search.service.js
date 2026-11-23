@@ -17,7 +17,11 @@
    ===================================================================== */
 
 const mongoose = require("mongoose");
+
 const Declaration = require("../models/Declaration");
+const Categorie = require("../models/Categorie");
+const Zone = require("../models/Zone");
+const Utilisateur = require("../models/Utilisateur");
 
 // ================================================================
 // 1. Valeurs autorisées
