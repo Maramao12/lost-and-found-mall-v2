@@ -9,7 +9,7 @@ const Utilisateur = require("../models/Utilisateur");
 const Notification = require("../models/Notification");
 
 // ---------------------------------------------------------------------
-// Fonction utilitaire : charge la correspondance avec les 2 déclarations
+// Fonctions utilitaires
 // ---------------------------------------------------------------------
 function chargerCorrespondance(id) {
   return Correspondance.findById(id)
@@ -17,9 +17,26 @@ function chargerCorrespondance(id) {
     .populate("declarationTrouveeId", "titre auteurId");
 }
 
-// Une correspondance acceptée ou refusée ne peut plus être modifiée
 function estCloturee(corr) {
   return corr.statut === "ACCEPTEE" || corr.statut === "REFUSEE";
+}
+
+function estProprietaire(corr, user) {
+  const auteurId =
+    corr.declarationPerdueId?.auteurId?._id ||
+    corr.declarationPerdueId?.auteurId;
+  return String(auteurId) === String(user._id);
+}
+
+function estTrouveur(corr, user) {
+  const auteurId =
+    corr.declarationTrouveeId?.auteurId?._id ||
+    corr.declarationTrouveeId?.auteurId;
+  return String(auteurId) === String(user._id);
+}
+
+function estAdmin(user) {
+  return user && user.role === "ADMIN";
 }
 
 // 1. GET /api/correspondances/:id — Consulter une correspondance
@@ -31,8 +48,23 @@ async function getCorrespondanceById(req, res, next) {
       .populate("analyseId");
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
     }
+    if (
+      !estProprietaire(corr, req.user) &&
+      !estTrouveur(corr, req.user) &&
+      !estAdmin(req.user)
+    ) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Accès refusé à cette correspondance.",
+        });
+    }
+
     return res.status(200).json({ success: true, data: corr });
   } catch (err) {
     next(err);
@@ -46,10 +78,25 @@ async function envoyerPreuve(req, res, next) {
     const corr = await chargerCorrespondance(req.params.id);
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
+    }
+    if (!estProprietaire(corr, req.user)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Action réservée au propriétaire de l'objet perdu.",
+        });
     }
     if (estCloturee(corr)) {
-      return res.status(400).json({ success: false, message: "Cette correspondance est déjà clôturée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Cette correspondance est déjà clôturée.",
+        });
     }
 
     corr.preuveProprietaire = preuveProprietaire;
@@ -64,7 +111,13 @@ async function envoyerPreuve(req, res, next) {
       type: "STATUT_MODIFIE",
     });
 
-    return res.status(200).json({ success: true, message: "Preuve envoyée avec succès.", data: corr });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Preuve envoyée avec succès.",
+        data: corr,
+      });
   } catch (err) {
     next(err);
   }
@@ -77,17 +130,37 @@ async function demanderVerification(req, res, next) {
     const corr = await chargerCorrespondance(req.params.id);
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
+    }
+    if (!estTrouveur(corr, req.user)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Action réservée à celui qui a trouvé l'objet.",
+        });
     }
     if (estCloturee(corr)) {
-      return res.status(400).json({ success: false, message: "Cette correspondance est déjà clôturée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Cette correspondance est déjà clôturée.",
+        });
     }
     if (!corr.preuveProprietaire) {
-      return res.status(400).json({ success: false, message: "Le propriétaire n'a pas encore envoyé de preuve." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Le propriétaire n'a pas encore envoyé de preuve.",
+        });
     }
 
     corr.questionVerification = questionVerification;
-    corr.reponseVerification = undefined; // nouvelle question -> ancienne réponse effacée
+    corr.reponseVerification = undefined;
     corr.statut = "A_VERIFIER";
     corr.dateMiseAJour = new Date();
     await corr.save();
@@ -99,7 +172,13 @@ async function demanderVerification(req, res, next) {
       type: "STATUT_MODIFIE",
     });
 
-    return res.status(200).json({ success: true, message: "Question envoyée au propriétaire.", data: corr });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Question envoyée au propriétaire.",
+        data: corr,
+      });
   } catch (err) {
     next(err);
   }
@@ -112,13 +191,33 @@ async function repondreVerification(req, res, next) {
     const corr = await chargerCorrespondance(req.params.id);
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
+    }
+    if (!estProprietaire(corr, req.user)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Action réservée au propriétaire de l'objet perdu.",
+        });
     }
     if (estCloturee(corr)) {
-      return res.status(400).json({ success: false, message: "Cette correspondance est déjà clôturée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Cette correspondance est déjà clôturée.",
+        });
     }
     if (!corr.questionVerification) {
-      return res.status(400).json({ success: false, message: "Aucune question de vérification n'a été posée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Aucune question de vérification n'a été posée.",
+        });
     }
 
     corr.reponseVerification = reponseVerification;
@@ -132,7 +231,9 @@ async function repondreVerification(req, res, next) {
       type: "STATUT_MODIFIE",
     });
 
-    return res.status(200).json({ success: true, message: "Réponse envoyée.", data: corr });
+    return res
+      .status(200)
+      .json({ success: true, message: "Réponse envoyée.", data: corr });
   } catch (err) {
     next(err);
   }
@@ -145,10 +246,25 @@ async function refuserCorrespondance(req, res, next) {
     const corr = await chargerCorrespondance(req.params.id);
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
+    }
+    if (!estTrouveur(corr, req.user)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Action réservée à celui qui a trouvé l'objet.",
+        });
     }
     if (estCloturee(corr)) {
-      return res.status(400).json({ success: false, message: "Cette correspondance est déjà clôturée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Cette correspondance est déjà clôturée.",
+        });
     }
 
     corr.statut = "REFUSEE";
@@ -159,54 +275,76 @@ async function refuserCorrespondance(req, res, next) {
     await Notification.create({
       utilisateurId: corr.declarationPerdueId.auteurId,
       titre: "Correspondance refusée",
-      message: `La correspondance pour "${corr.declarationPerdueId.titre}" a été refusée.` +
+      message:
+        `La correspondance pour "${corr.declarationPerdueId.titre}" a été refusée.` +
         (motifRefus ? ` Motif : ${motifRefus}` : ""),
       type: "CORRESPONDANCE_REFUSEE",
     });
 
-    return res.status(200).json({ success: true, message: "Correspondance refusée.", data: corr });
+    return res
+      .status(200)
+      .json({ success: true, message: "Correspondance refusée.", data: corr });
   } catch (err) {
     next(err);
   }
 }
 
 // 6. PATCH /api/correspondances/:id/accepter — Celui qui a trouvé accepte
-//    ACCEPTEE + déclarations EN_COURS + autres demandes annulées + téléphone
 async function accepterCorrespondance(req, res, next) {
   try {
     const corr = await chargerCorrespondance(req.params.id);
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
+    }
+    if (!estTrouveur(corr, req.user)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Action réservée à celui qui a trouvé l'objet.",
+        });
     }
     if (estCloturee(corr)) {
-      return res.status(400).json({ success: false, message: "Cette correspondance est déjà clôturée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Cette correspondance est déjà clôturée.",
+        });
     }
     if (!corr.preuveProprietaire) {
-      return res.status(400).json({ success: false, message: "Impossible d'accepter sans preuve du propriétaire." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Impossible d'accepter sans preuve du propriétaire.",
+        });
     }
 
     const idPerdue = corr.declarationPerdueId._id;
     const idTrouvee = corr.declarationTrouveeId._id;
     const maintenant = new Date();
 
-    // a) La correspondance est acceptée
     corr.statut = "ACCEPTEE";
     corr.dateMiseAJour = maintenant;
     await corr.save();
 
-    // b) Les 2 déclarations passent EN_COURS de remise
     await Declaration.updateMany(
       { _id: { $in: [idPerdue, idTrouvee] } },
       { $set: { statut: "EN_COURS", dateModification: maintenant } },
     );
 
-    // c) Les autres demandes encore ouvertes sur ces déclarations sont annulées
     const annulation = await Correspondance.updateMany(
       {
         _id: { $ne: corr._id },
         statut: { $in: ["PROPOSEE", "A_VERIFIER"] },
-        $or: [{ declarationPerdueId: idPerdue }, { declarationTrouveeId: idTrouvee }],
+        $or: [
+          { declarationPerdueId: idPerdue },
+          { declarationTrouveeId: idTrouvee },
+        ],
       },
       {
         $set: {
@@ -217,24 +355,32 @@ async function accepterCorrespondance(req, res, next) {
       },
     );
 
-    // d) Récupérer les numéros de téléphone dans la collection utilisateurs
-    const proprietaire = await Utilisateur.findById(corr.declarationPerdueId.auteurId).select("nom prenom telephone");
-    const trouveur = await Utilisateur.findById(corr.declarationTrouveeId.auteurId).select("nom prenom telephone");
-    const telephoneContact = trouveur && trouveur.telephone ? trouveur.telephone : "non renseigné";
-    const telephoneProprietaire = proprietaire && proprietaire.telephone ? proprietaire.telephone : "non renseigné";
+    const proprietaire = await Utilisateur.findById(
+      corr.declarationPerdueId.auteurId,
+    ).select("nom prenom telephone");
+    const trouveur = await Utilisateur.findById(
+      corr.declarationTrouveeId.auteurId,
+    ).select("nom prenom telephone");
+    const telephoneContact =
+      trouveur && trouveur.telephone ? trouveur.telephone : "non renseigné";
+    const telephoneProprietaire =
+      proprietaire && proprietaire.telephone
+        ? proprietaire.telephone
+        : "non renseigné";
 
-    // e) Notifier les deux membres avec le numéro de l'autre
     await Notification.create({
       utilisateurId: corr.declarationPerdueId.auteurId,
       titre: "Correspondance acceptée !",
-      message: `Votre objet "${corr.declarationPerdueId.titre}" a été retrouvé. ` +
+      message:
+        `Votre objet "${corr.declarationPerdueId.titre}" a été retrouvé. ` +
         `Contactez le ${telephoneContact} pour le récupérer à l'accueil du centre commercial.`,
       type: "CORRESPONDANCE_ACCEPTEE",
     });
     await Notification.create({
       utilisateurId: corr.declarationTrouveeId.auteurId,
       titre: "Correspondance acceptée !",
-      message: `Vous avez validé la correspondance pour "${corr.declarationTrouveeId.titre}". ` +
+      message:
+        `Vous avez validé la correspondance pour "${corr.declarationTrouveeId.titre}". ` +
         `Le propriétaire est joignable au ${telephoneProprietaire}. Rendez-vous à l'accueil du centre commercial.`,
       type: "CORRESPONDANCE_ACCEPTEE",
     });
@@ -257,15 +403,29 @@ async function confirmerRestitution(req, res, next) {
     const corr = await chargerCorrespondance(req.params.id);
 
     if (!corr) {
-      return res.status(404).json({ success: false, message: "Correspondance introuvable." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Correspondance introuvable." });
+    }
+    if (!estProprietaire(corr, req.user) && !estTrouveur(corr, req.user)) {
+      return res.status(403).json({ success: false, message: "Accès refusé." });
     }
     if (corr.statut !== "ACCEPTEE") {
-      return res.status(400).json({ success: false, message: "Seule une correspondance acceptée peut être restituée." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Seule une correspondance acceptée peut être restituée.",
+        });
     }
 
     const maintenant = new Date();
     await Declaration.updateMany(
-      { _id: { $in: [corr.declarationPerdueId._id, corr.declarationTrouveeId._id] } },
+      {
+        _id: {
+          $in: [corr.declarationPerdueId._id, corr.declarationTrouveeId._id],
+        },
+      },
       { $set: { statut: "RESTITUEE", dateModification: maintenant } },
     );
 
@@ -287,7 +447,9 @@ async function confirmerRestitution(req, res, next) {
       },
     ]);
 
-    return res.status(200).json({ success: true, message: "Restitution confirmée.", data: corr });
+    return res
+      .status(200)
+      .json({ success: true, message: "Restitution confirmée.", data: corr });
   } catch (err) {
     next(err);
   }

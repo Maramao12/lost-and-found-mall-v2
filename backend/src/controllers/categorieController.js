@@ -1,28 +1,13 @@
 /* =====================================================================
    src/controllers/categorieController.js
-   ---------------------------------------------------------------------
-   Gestion des catégories d'objets (binôme 4).
-
-   RÈGLES MÉTIER
-   - Lecture (liste, détail) : tout utilisateur connecté (le formulaire
-     de déclaration a besoin de la liste des catégories).
-   - Création, modification, suppression : ADMIN seulement.
-   - Le nom est unique, sans tenir compte des majuscules ni des accents.
-   - Suppression REFUSÉE (409) tant que des déclarations utilisent la
-     catégorie : on ne casse jamais l'historique.
+   Catégories d'objets (Sacs, Bijoux, Vêtements...).
+   Lecture : tout utilisateur connecté. Écriture : ADMIN seulement.
+   Suppression refusée tant qu'une déclaration utilise la catégorie.
    ===================================================================== */
 
 const Categorie = require("../models/Categorie");
 const Declaration = require("../models/Declaration");
 const AppError = require("../utils/AppError");
-
-// Recherche insensible à la casse et aux accents (collation française)
-function trouverParNom(nom) {
-  return Categorie.findOne({ nom: nom }).collation({
-    locale: "fr",
-    strength: 1,
-  });
-}
 
 async function chargerCategorie(id) {
   const categorie = await Categorie.findById(id);
@@ -31,10 +16,27 @@ async function chargerCategorie(id) {
   return categorie;
 }
 
+async function verifierNomLibre(nom, idIgnore) {
+  const filtre = { nom: nom };
+  if (idIgnore) filtre._id = { $ne: idIgnore };
+  // collation : "sacs" et "Sacs" sont considérés identiques
+  const existe = await Categorie.findOne(filtre).collation({
+    locale: "fr",
+    strength: 2,
+  });
+  if (existe)
+    throw new AppError(
+      409,
+      "CATEGORY_ALREADY_EXISTS",
+      "Une catégorie porte déjà ce nom",
+    );
+}
+
 // GET /api/categories
+// Pas de pagination : la liste est courte et sert aux menus déroulants.
 async function list(req, res) {
   const categories = await Categorie.find().sort({ nom: 1 });
-  res.json({ success: true, data: categories, count: categories.length });
+  res.json({ success: true, data: categories });
 }
 
 // GET /api/categories/:id
@@ -43,64 +45,49 @@ async function getOne(req, res) {
   res.json({ success: true, data: { categorie: categorie } });
 }
 
-// POST /api/categories
+// POST /api/categories   (ADMIN)
 async function create(req, res) {
   const { nom, description } = req.body;
-
-  if (await trouverParNom(nom)) {
-    throw new AppError(
-      409,
-      "CATEGORY_ALREADY_EXISTS",
-      "Une catégorie porte déjà ce nom",
-    );
-  }
-
+  await verifierNomLibre(nom);
   const categorie = await Categorie.create({
     nom: nom,
     description: description || undefined,
   });
-
   res.status(201).json({ success: true, data: { categorie: categorie } });
 }
 
-// PATCH /api/categories/:id
+// PATCH /api/categories/:id   (ADMIN)
 async function update(req, res) {
   const categorie = await chargerCategorie(req.params.id);
   const { nom, description } = req.body;
 
-  if (nom !== undefined) {
-    const existante = await trouverParNom(nom);
-    if (existante && String(existante._id) !== String(categorie._id)) {
-      throw new AppError(
-        409,
-        "CATEGORY_ALREADY_EXISTS",
-        "Une catégorie porte déjà ce nom",
-      );
-    }
+  if (nom !== undefined && nom !== categorie.nom) {
+    await verifierNomLibre(nom, categorie._id);
     categorie.nom = nom;
   }
   if (description !== undefined)
-    categorie.description = description || undefined; // "" efface
+    categorie.description = description || undefined;
 
   await categorie.save();
   res.json({ success: true, data: { categorie: categorie } });
 }
 
-// DELETE /api/categories/:id
+// DELETE /api/categories/:id   (ADMIN)
 async function remove(req, res) {
   const categorie = await chargerCategorie(req.params.id);
 
-  const utilisations = await Declaration.countDocuments({
+  // Toutes les déclarations comptent, même SUPPRIMEE (l'historique garde la référence)
+  const utilisees = await Declaration.countDocuments({
     categorieId: categorie._id,
   });
-  if (utilisations > 0) {
+  if (utilisees > 0) {
     throw new AppError(
       409,
       "CATEGORY_IN_USE",
       "Suppression impossible : " +
-        utilisations +
+        utilisees +
         " déclaration(s) utilisent cette catégorie",
-      { declarations: utilisations },
+      { declarations: utilisees },
     );
   }
 
@@ -109,3 +96,5 @@ async function remove(req, res) {
 }
 
 module.exports = { list, getOne, create, update, remove };
+
+

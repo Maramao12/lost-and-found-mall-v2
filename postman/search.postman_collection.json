@@ -1,0 +1,1414 @@
+{
+  "info": {
+    "_postman_id": "a1f8b391-38c5-4093-b5d3-3fe1d34f037d",
+    "name": "Search",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58508446",
+    "_collection_link": "https://go.postman.co/collection/58508446-a1f8b391-38c5-4093-b5d3-3fe1d34f037d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Préparation",
+      "item": [
+        {
+          "name": "Catégories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"categorieId\", pm.response.json().data[0]._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));\r\npm.collectionVariables.set(\"tokenAdmin\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"admin@lostfound.tn\",\"motDePasse\":\"Admin12345\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Amine",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));\r\npm.collectionVariables.set(\"tokenAmine\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"amine@mail.tn\",\"motDePasse\":\"Membre12345\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Zones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"zoneId\", pm.response.json().data[0]._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recherches valides",
+      "item": [
+        {
+          "name": "Recherche sans filtre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 1, 2, 4, 5, 6 (recherche valide)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre mot-clé (sac)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 1, 2, 4, 5, 6 (recherche valide)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?q=sac",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "sac"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre type TROUVE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requête 3\r\npm.test(\"Que des TROUVE\", () =>\r\n  pm.response.json().data.forEach(d => pm.expect(d.type).to.eql(\"TROUVE\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?type=TROUVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "TROUVE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtres combinés",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 1, 2, 4, 5, 6 (recherche valide)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?type=PERDU&q=sac&categorieId={{categorieId}}&zoneId={{zoneId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "PERDU"
+                },
+                {
+                  "key": "q",
+                  "value": "sac"
+                },
+                {
+                  "key": "categorieId",
+                  "value": "{{categorieId}}"
+                },
+                {
+                  "key": "zoneId",
+                  "value": "{{zoneId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre période",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 1, 2, 4, 5, 6 (recherche valide)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?dateDebut=2026-01-01&dateFin=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "dateDebut",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "dateFin",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri plus anciens d'abord",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 1, 2, 4, 5, 6 (recherche valide)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?sort=ancien",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "ancien"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pagination (1 par page)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?page=1&limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aucun résultat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requête 8 (sans résultat)\r\npm.test(\"200 et liste vide\", () => {\r\n  pm.response.to.have.status(200);\r\n  pm.expect(pm.response.json().data).to.have.lengthOf(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?q=zzzzzzzz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "zzzzzzzz"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Paramètres invalides (400)",
+      "item": [
+        {
+          "name": "Type invalide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 9 à 13 (paramètres invalides)\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?type=AUTRE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "AUTRE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Limit trop grand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 9 à 13 (paramètres invalides)\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?limit=500",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "500"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "dateDebut après dateFin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 9 à 13 (paramètres invalides)\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?dateDebut=2026-12-01&dateFin=2026-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "dateDebut",
+                  "value": "2026-12-01"
+                },
+                {
+                  "key": "dateFin",
+                  "value": "2026-01-01"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "categorieId invalide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 9 à 13 (paramètres invalides)\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?categorieId=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "categorieId",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Paramètre inconnu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requêtes 9 à 13 (paramètres invalides)\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?foo=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "foo",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sécurité",
+      "item": [
+        {
+          "name": "Sans jeton (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requête 14\r\npm.test(\"401 UNAUTHENTICATED\", () => {\r\n  pm.response.to.have.status(401);\r\n  pm.expect(pm.response.json().error.code).to.eql(\"UNAUTHENTICATED\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Membre interdit (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requête 15\r\npm.test(\"403 FORBIDDEN\", () => {\r\n  pm.response.to.have.status(403);\r\n  pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catégories (admin)",
+      "item": [
+        {
+          "name": "Liste catégories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));\r\npm.test(\"Tri par défaut : A vers Z\", () => {\r\n  const noms = pm.response.json().data.map(c => c.nom);\r\n  pm.expect(noms).to.eql([...noms].sort());\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mot-clé sac",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));\r\n// 17 : au moins un résultat\r\npm.test(\"Au moins un résultat\", () =>\r\n  pm.expect(pm.response.json().data.length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?q=sac",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "sac"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mot-clé en majuscules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?q=SAC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "SAC"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri Z vers A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 19 : tri décroissant\r\npm.test(\"Noms triés Z vers A\", () => {\r\n  const noms = pm.response.json().data.map(c => c.nom);\r\n  pm.expect(noms).to.eql([...noms].sort().reverse());\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?sort=nom_desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "nom_desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri A vers Z",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Noms triés A vers Z\", () => {\r\n  const noms = pm.response.json().data.map(c => c.nom);\r\n  pm.expect(noms).to.eql([...noms].sort());\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?sort=nom_asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "nom_asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pagination",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?page=1&limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aucun résultat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 21, 22 : aucun résultat sans erreur\r\npm.test(\"200 et liste vide\", () => {\r\n  pm.response.to.have.status(200);\r\n  pm.expect(pm.response.json().data).to.have.lengthOf(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?q=zzzzzzzz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "zzzzzzzz"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Caractères spéciaux",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 21, 22 : aucun résultat sans erreur\r\npm.test(\"200 et liste vide\", () => {\r\n  pm.response.to.have.status(200);\r\n  pm.expect(pm.response.json().data).to.have.lengthOf(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?q=.*",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": ".*"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri invalide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 23, 24, 25 : paramètre invalide\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?sort=autre\t",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "autre\t"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Limit trop grand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 23, 24, 25 : paramètre invalide\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?limit=500",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "500"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Paramètre inconnu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 23, 24, 25 : paramètre invalide\r\npm.test(\"Statut 400\", () => pm.response.to.have.status(400));\r\npm.test(\"error.code = VALIDATION_ERROR\", () =>\r\n  pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories?foo=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "foo",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sans jeton (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requête \r\npm.test(\"401 UNAUTHENTICATED\", () => {\r\n  pm.response.to.have.status(401);\r\n  pm.expect(pm.response.json().error.code).to.eql(\"UNAUTHENTICATED\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Membre interdit (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Requête\r\npm.test(\"403 FORBIDDEN\", () => {\r\n  pm.response.to.have.status(403);\r\n  pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Zones (admin)",
+      "item": [
+        {
+          "name": "Liste zones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mot-clé nom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones?q=food",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "food"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mot-clé emplacement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Liste valide (16, 17, 18, 20)\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst j = pm.response.json();\r\npm.test(\"data est un tableau\", () => pm.expect(j.data).to.be.an(\"array\"));\r\npm.test(\"pagination présente\", () => pm.expect(j.pagination).to.have.property(\"total\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones?q=niveau",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "niveau"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri A vers Z",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Noms triés A vers Z\", () => {\r\n  const noms = pm.response.json().data.map(c => c.nom);\r\n  pm.expect(noms).to.eql([...noms].sort());\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones?sort=nom_asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "nom_asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri Z vers A",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones?sort=nom_desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "nom_desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri invalide",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones?sort=autre",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "autre"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sans jeton (401)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Membre interdit (403)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAmine}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{tokenAdmin}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenAmine",
+      "value": ""
+    },
+    {
+      "key": "categorieId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    }
+  ]
+}

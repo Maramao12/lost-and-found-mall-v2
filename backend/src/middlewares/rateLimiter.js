@@ -12,7 +12,10 @@ function reponse429(message) {
   return function (req, res) {
     res.status(429).json({
       success: false,
-      error: { code: "TOO_MANY_REQUESTS", message: message }
+      error: {
+        code: "TOO_MANY_REQUESTS",
+        message: message,
+      },
     });
   };
 }
@@ -27,7 +30,7 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
-  handler: reponse429("Trop de tentatives, réessayez dans quelques minutes")
+  handler: reponse429("Trop de tentatives, réessayez dans quelques minutes"),
 });
 
 // Limite générale sur toute l'API : 300 requêtes / 15 min / IP
@@ -36,7 +39,7 @@ const apiLimiter = rateLimit({
   limit: 300,
   standardHeaders: true,
   legacyHeaders: false,
-  handler: reponse429("Trop de requêtes, réessayez plus tard")
+  handler: reponse429("Trop de requêtes, réessayez plus tard"),
 });
 
 module.exports = { authLimiter, apiLimiter };

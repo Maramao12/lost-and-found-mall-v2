@@ -1,7 +1,6 @@
 /* =====================================================================
    src/validators/categorieValidator.js
-   Schémas Zod du domaine "catégories" (binôme 4).
-   .strict() : toute clé inconnue est refusée.
+   Schémas Zod des catégories d'objets (.strict() : clés inconnues refusées)
    ===================================================================== */
 
 const { z } = require("zod");
@@ -15,7 +14,7 @@ const nom = z
   })
   .trim()
   .min(2, "Nom : 2 caractères minimum")
-  .max(100, "Nom : 100 caractères maximum");
+  .max(60, "Nom : 60 caractères maximum");
 
 // "" est accepté : il sert à EFFACER la description
 const description = z

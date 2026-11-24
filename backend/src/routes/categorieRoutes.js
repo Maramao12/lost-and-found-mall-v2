@@ -1,10 +1,9 @@
 /* =====================================================================
    src/routes/categorieRoutes.js   ->   /api/categories
-   - GET : tout utilisateur connecté
-   - POST / PATCH / DELETE : ADMIN seulement
    ===================================================================== */
 
 const express = require("express");
+
 const { authenticate, authorize } = require("../middlewares/auth");
 const validate = require("../middlewares/validate");
 const asyncHandler = require("../utils/asyncHandler");
@@ -19,6 +18,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+// Lecture : tout utilisateur connecté
 router.get("/", asyncHandler(ctrl.list));
 router.get(
   "/:id",
@@ -26,6 +26,7 @@ router.get(
   asyncHandler(ctrl.getOne),
 );
 
+// Écriture : administrateur seulement
 router.post(
   "/",
   authorize("ADMIN"),

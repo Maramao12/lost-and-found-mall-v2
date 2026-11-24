@@ -13,8 +13,20 @@ const controller = require("../controllers/authController");
 const router = express.Router();
 
 // Ordre : limiteur -> validation Zod -> contrôleur
-router.post("/register", authLimiter, validate(registerSchema), asyncHandler(controller.register));
-router.post("/login", authLimiter, validate(loginSchema), asyncHandler(controller.login));
+router.post(
+  "/register",
+  authLimiter,
+  validate(registerSchema),
+  asyncHandler(controller.register),
+);
+
+router.post(
+  "/login",
+  authLimiter,
+  validate(loginSchema),
+  asyncHandler(controller.login),
+);
+
 router.get("/me", authenticate, controller.me);
 
 module.exports = router;

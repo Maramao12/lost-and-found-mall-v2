@@ -12,7 +12,9 @@ const jwt = require("jsonwebtoken");
 
 const secret = process.env.JWT_SECRET;
 if (!secret || secret.length < 16) {
-  throw new Error("JWT_SECRET absente ou trop courte (16 caractères minimum) : vérifiez backend/.env");
+  throw new Error(
+    "JWT_SECRET absente ou trop courte (16 caractères minimum) : vérifiez backend/.env",
+  );
 }
 
 // On impose l'algorithme : empêche l'attaque "alg: none".
@@ -22,7 +24,7 @@ function signToken(utilisateur) {
   return jwt.sign(
     { sub: String(utilisateur._id), role: utilisateur.role },
     secret,
-    { algorithm: ALGORITHM, expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+    { algorithm: ALGORITHM, expiresIn: process.env.JWT_EXPIRES_IN || "1d" },
   );
 }
 

@@ -3,10 +3,6 @@
    ---------------------------------------------------------------------
    ROUTEUR CENTRAL. Toutes les routes de l'API passent par ici, sous le
    préfixe /api (défini dans app.js).
-
-   RÈGLE D'ÉQUIPE : chaque binôme ajoute UNE ligne (la sienne) dans la
-   zone "ROUTES DES BINÔMES". Ne touchez pas aux lignes des autres :
-   cela évite les conflits git.
    ===================================================================== */
 
 const express = require("express");
@@ -17,10 +13,10 @@ const router = express.Router();
 // ---------------------------------------------------------------------
 // Route de test : GET /api/health
 // Vérifie que le serveur tourne et que MongoDB est connecté.
-// readyState : 0 déconnecté, 1 connecté, 2 en connexion, 3 déconnexion
 // ---------------------------------------------------------------------
 router.get("/health", function (req, res) {
   const etats = ["disconnected", "connected", "connecting", "disconnecting"];
+
   res.json({
     success: true,
     status: "ok",
@@ -29,24 +25,25 @@ router.get("/health", function (req, res) {
 });
 
 // ---------------------------------------------------------------------
-// ROUTES DES BINÔMES (décommentez / ajoutez votre ligne quand votre
-// fichier de routes existe)
+// ROUTES DES BINÔMES
 // ---------------------------------------------------------------------
-// Binôme 1 : utilisateurs, déclarations, sécurité
-// router.use("/auth", require("./auth.routes"));
-// router.use("/declarations", require("./declarations.routes"));
+
+// Binôme 1 : utilisateurs, déclarations et sécurité
+router.use("/auth", require("./authRoutes"));
+router.use("/users", require("./userRoutes"));
+router.use("/declarations", require("./declarationRoutes"));
+router.use("/categories", require("./categorieRoutes"));
+router.use("/zones", require("./zoneRoutes"));
 
 // Binôme 2 : recherche
-// router.use("/search", require("./search.routes"));
+router.use("/search", require("./search.routes"));
 
 // Binôme 3 : matching et correspondances
 router.use("/correspondances", require("./matching.routes"));
 
-// Binôme 4 : administration, signalements, statistiques
-router.use("/zones", require("./zoneRoutes"));
-router.use("/categories", require("./categorieRoutes"));
+// Binôme 4 : administration et signalements
 router.use("/admin/stats", require("./adminStatsRoutes"));
-router.use("/admin/declarations", require("./adminDeclarationRoutes"));
-// router.use("/admin", require("./admin.routes"));
+router.use("/admin", require("./admin.routes"));
+router.use("/signalements", require("./signalement.routes"));
 
 module.exports = router;

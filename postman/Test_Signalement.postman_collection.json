@@ -1,0 +1,1096 @@
+{
+  "info": {
+    "_postman_id": "bb729cf3-c42f-4bd1-8491-94e9b6d518bc",
+    "name": "Test_Signalement",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58520071",
+    "_collection_link": "https://go.postman.co/collection/58520071-bb729cf3-c42f-4bd1-8491-94e9b6d518bc?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Backend fonctionne",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"loujaine@admin.com\",\r\n\r\n  \"motDePasse\": \"Test123456\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register user",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n\r\n{\r\n  \"nom\": \"Mostafa\",\r\n  \"prenom\": \"Ahmed\",\r\n  \"email\": \"ahmed.test.signalement@example.com\",\r\n  \"motDePasse\": \"Test123456\",\r\n  \"telephone\": \"22123456\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Signalement",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Signalement non traitée",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports?traite=false",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "traite",
+              "value": "false"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Signalement traitée avec fausse déclaration",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports?motif=FAUSSE_DECLARATION",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "motif",
+              "value": "FAUSSE_DECLARATION"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Signalement traitée",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports?traite=true",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "traite",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Filtrer par date",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports?dateDebut=2026-11-01T00:00:00.000Z&dateFin=2026-11-21T23:59:59.000Z",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "dateDebut",
+              "value": "2026-11-01T00:00:00.000Z"
+            },
+            {
+              "key": "dateFin",
+              "value": "2026-11-21T23:59:59.000Z"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Signalement recherché par filtre combiné",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports?motif=DOUBLON&traite=false&page=1&limit=10",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "motif",
+              "value": "DOUBLON"
+            },
+            {
+              "key": "traite",
+              "value": "false"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Infos signalement",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports/6afc44ccb1ca68d4b6d6cb71",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports",
+            "6afc44ccb1ca68d4b6d6cb71"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "signalement non justifié",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"decision\": \"NON_JUSTIFIE\",\r\n  \"commentaireAdmin\": \"La déclaration respecte les règles du centre commercial.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports/6b021aa763584ffc7c6c748a/resolve",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports",
+            "6b021aa763584ffc7c6c748a",
+            "resolve"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "signalement justifié, déclaration masquée",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"decision\": \"JUSTIFIE_MASQUER\",\r\n  \"commentaireAdmin\": \"Le contenu ne respecte pas les règles du centre commercial.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports/6b02cfdea89f4570e393f7cc/resolve",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports",
+            "6b02cfdea89f4570e393f7cc",
+            "resolve"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "signalement justifié, déclaration maintenue",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_11gq}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"decision\": \"JUSTIFIE_MAINTENIR\",\r\n  \"commentaireAdmin\": \"Après vérification, la déclaration peut rester publiée.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports/6b02d27aa89f4570e393f7df/resolve",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports",
+            "6b02d27aa89f4570e393f7df",
+            "resolve"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "signalement justifié, déclaration masquée",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_1af0}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"decision\": \"JUSTIFIE_MASQUER\",\r\n  \"commentaireAdmin\": \"Le contenu ne respecte pas les règles du centre commercial.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports/6b02cf71a89f4570e393f7c6/resolve",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports",
+            "6b02cf71a89f4570e393f7c6",
+            "resolve"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Membre bien connecté",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0i60}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/me",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "auth",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "obtenir mes déclarations",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0i60}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/declarations/me",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "declarations",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "créer signalement sur une declaration",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0q40}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"declarationId\": \"6b02d083a89f4570e393f7d6\",\r\n  \"motif\": \"CONTENU_INAPPROPRIE\",\r\n  \"description\": \"Cette déclaration mérite une vérification par l'administration.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/signalements",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "signalements"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "créer declaration",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_115x}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"type\": \"TROUVE\",\r\n  \"titre\": \"pochette trouvé\",\r\n  \"description\": \"pochette marron retrouvé dans le parking.\",\r\n  \"dateEvenement\": \"2026-11-20\",\r\n  \"photoUrl\": \"https://exemple.tn/photos/sac.jpg\",\r\n  \"categorieId\": \"6afc44ccb1ca68d4b6d6cb63\",\r\n  \"zoneId\": \"6afc44ccb1ca68d4b6d6cb68\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/declarations",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "declarations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "voir mes déclarations",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0ca6}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/declarations/me",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "declarations",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "voir déclaration par id",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0kos}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/declarations/6b02155363584ffc7c6c7465",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "declarations",
+            "6b02155363584ffc7c6c7465"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Liste de Signalement",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/reports",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "reports"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "consulter les déclarations trouvées et masquées",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/declarations?type=TROUVE&masquee=true&page=1&limit=10",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "declarations"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "TROUVE"
+            },
+            {
+              "key": "masquee",
+              "value": "true"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Masquer déclaration",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"action\": \"MASQUER\",\r\n  \"motif\": \"Contenu inapproprié selon les règles du centre commercial.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/declarations/6b0218c763584ffc7c6c747a/moderation",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "declarations",
+            "6b0218c763584ffc7c6c747a",
+            "moderation"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Restaurer Déclaration",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"action\": \"RESTAURER\",\r\n  \"motif\": \"Après vérification, la déclaration peut être rendue visible.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/declarations/6b02ccdea89f4570e393f7b2/moderation",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "declarations",
+            "6b02ccdea89f4570e393f7b2",
+            "moderation"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Users",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Suspendre Utilisateur",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"actif\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/users/6afc44ccb1ca68d4b6d6cb61/status",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "users",
+            "6afc44ccb1ca68d4b6d6cb61",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vérifier suspension de user",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/admin/users?actif=false",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "users"
+          ],
+          "query": [
+            {
+              "key": "actif",
+              "value": "false"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Réactiver Membre",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0hw9}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"actif\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/admin/users/6afc44ccb1ca68d4b6d6cb61/status",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "admin",
+            "users",
+            "6afc44ccb1ca68d4b6d6cb61",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vérifier réactivation de Membre",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "json_web_token_0hw9",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_0kos",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_0ca6",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_115x",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_0q40",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_0i60",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_1af0",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_11gq",
+      "secret": true
+    }
+  ]
+}
