@@ -83,6 +83,20 @@ const listDeclarationsSchema = paginationSchema.extend({
   masquee: z.enum(["true", "false"]).optional(),
 
   search: z.string().trim().max(100).optional(),
+
+  // Filtres ajoutés par le binôme 4 (statistiques / supervision)
+  zoneId: objectId.optional(),
+  categorieId: objectId.optional(),
+  auteurId: objectId.optional(),
+  q: z
+    .string()
+    .trim()
+    .min(2, "Recherche : 2 caractères minimum")
+    .max(100)
+    .optional(),
+  depuis: z.coerce.date().optional(),
+  jusqua: z.coerce.date().optional(),
+  tri: z.enum(["recent", "ancien"]).default("recent"),
 });
 
 // ---------------------------------------------------------------------
