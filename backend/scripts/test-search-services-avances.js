@@ -33,10 +33,45 @@ async function tester(nom, fonction) {
   }
 }
 
+// Vérifie une condition.
 function verifier(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+// Convertit une date en YYYY-MM-DD (date locale).
+function formaterDateLocale(date) {
+  const annee = date.getFullYear();
+  const mois = String(date.getMonth() + 1).padStart(2, "0");
+  const jour = String(date.getDate()).padStart(2, "0");
+
+  return `${annee}-${mois}-${jour}`;
+}
+
+// Construit les bornes locales d'une journée.
+function debutJournee(date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+}
+
+function finJournee(date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
 }
 
 async function testsAvances() {
@@ -167,24 +202,32 @@ async function testsAvances() {
       const fin = new Date(date);
       fin.setDate(fin.getDate() + 1);
 
+      // Le service attend le format YYYY-MM-DD.
+      const dateDebut = formaterDateLocale(debut);
+      const dateFin = formaterDateLocale(fin);
+
       const resultat = await getMemberHistory(
         memberId,
         {
-          dateDebut: debut.toISOString(),
-          dateFin: fin.toISOString(),
+          dateDebut,
+          dateFin,
         },
         { page: 1, limit: 10 },
       );
 
+      // Vérification selon les journées entières incluses.
+      const debutInclus = debutJournee(debut);
+      const finIncluse = finJournee(fin);
+
       verifier(
         resultat.data.every((item) => {
           const d = new Date(item.dateEvenement);
-          return d >= debut && d <= fin;
+          return d >= debutInclus && d <= finIncluse;
         }),
         "Une date d'événement est hors de la période.",
       );
 
-      return `Période : ${debut.toISOString()} -> ${fin.toISOString()} | Résultats : ${resultat.data.length}`;
+      return `Période : ${dateDebut} -> ${dateFin} | Résultats : ${resultat.data.length}`;
     });
 
     // TEST 6 : filtre par date de création.
@@ -197,24 +240,32 @@ async function testsAvances() {
       const fin = new Date(date);
       fin.setDate(fin.getDate() + 1);
 
+      // Le service attend le format YYYY-MM-DD.
+      const dateCreationDebut = formaterDateLocale(debut);
+      const dateCreationFin = formaterDateLocale(fin);
+
       const resultat = await getMemberHistory(
         memberId,
         {
-          dateCreationDebut: debut.toISOString(),
-          dateCreationFin: fin.toISOString(),
+          dateCreationDebut,
+          dateCreationFin,
         },
         { page: 1, limit: 10 },
       );
 
+      // Vérification selon les journées entières incluses.
+      const debutInclus = debutJournee(debut);
+      const finIncluse = finJournee(fin);
+
       verifier(
         resultat.data.every((item) => {
           const d = new Date(item.dateCreation);
-          return d >= debut && d <= fin;
+          return d >= debutInclus && d <= finIncluse;
         }),
         "Une date de création est hors de la période.",
       );
 
-      return `Résultats : ${resultat.data.length}`;
+      return `Période : ${dateCreationDebut} -> ${dateCreationFin} | Résultats : ${resultat.data.length}`;
     });
 
     // TEST 7 : tri récent et ancien.

@@ -124,14 +124,36 @@ async function create(req, res) {
 // GET /api/declarations/me?page=&limit=&statut=&type=
 // "Mes déclarations" (hors supprimées), paginées
 // ---------------------------------------------------------------------
+
 async function listMine(req, res) {
   const { page, limit, statut, type } = req.query;
 
-  const filtre = { auteurId: req.user._id, statut: { $ne: "SUPPRIMEE" } };
-  if (statut) filtre.statut = statut;
-  if (type) filtre.type = type;
+  // Toujours exclure les déclarations supprimées.
+  const filtre = {
+    auteurId: req.user._id,
+    statut: { $ne: "SUPPRIMEE" },
+  };
 
-  // Utilise l'index idx_auteur (auteurId + dateCreation)
+  if (statut) {
+    // Protection supplémentaire, même si Zod refuse déjà SUPPRIMEE.
+    if (statut === "SUPPRIMEE") {
+      throw new AppError(
+        400,
+        "INVALID_STATUS",
+        "Les déclarations supprimées ne sont pas accessibles dans cet historique.",
+      );
+    }
+
+    filtre.statut = {
+      $eq: statut,
+      $ne: "SUPPRIMEE",
+    };
+  }
+
+  if (type) {
+    filtre.type = type;
+  }
+
   const [declarations, total] = await Promise.all([
     Declaration.find(filtre)
       .sort({ dateCreation: -1 })
@@ -139,6 +161,7 @@ async function listMine(req, res) {
       .limit(limit)
       .populate("categorieId", "nom")
       .populate("zoneId", "nom emplacement"),
+
     Declaration.countDocuments(filtre),
   ]);
 
@@ -146,9 +169,9 @@ async function listMine(req, res) {
     success: true,
     data: declarations,
     pagination: {
-      page: page,
-      limit: limit,
-      total: total,
+      page,
+      limit,
+      total,
       pages: Math.max(1, Math.ceil(total / limit)),
     },
   });

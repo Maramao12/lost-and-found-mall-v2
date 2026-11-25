@@ -34,6 +34,13 @@ function construireTriCategorie(sort) {
   return tris[sort] || tris.nom_asc;
 }
 
+// Collation : tri alphabétique français sans distinction
+// entre majuscules et minuscules.
+const COLLATION_FR = {
+  locale: "fr",
+  strength: 2,
+};
+
 // Recherche les catégories avec pagination.
 async function searchCategories(filtres = {}, options = {}) {
   const page = Math.max(1, parseInt(options.page, 10) || 1);
@@ -45,7 +52,12 @@ async function searchCategories(filtres = {}, options = {}) {
   const tri = construireTriCategorie(options.sort);
 
   const [categories, total] = await Promise.all([
-    Categorie.find(query).sort(tri).skip(skip).limit(limit).lean(),
+    Categorie.find(query)
+      .collation(COLLATION_FR)
+      .sort(tri)
+      .skip(skip)
+      .limit(limit)
+      .lean(),
 
     Categorie.countDocuments(query),
   ]);
