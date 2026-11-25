@@ -42,6 +42,7 @@ router.use("/search", require("./search.routes"));
 router.use("/correspondances", require("./matching.routes"));
 
 // Binôme 4 : administration et signalements
+router.use("/admin/stats", require("./adminStatsRoutes"));
 router.use("/admin", require("./admin.routes"));
 router.use("/signalements", require("./signalement.routes"));
 

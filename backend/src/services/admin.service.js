@@ -230,7 +230,21 @@ async function resolveReport(id, adminId, donnees) {
 // Liste et filtrage des déclarations
 // =====================================================================
 async function getDeclarations(filtres) {
-  const { page, limit, type, statut, masquee, search } = filtres;
+  const {
+    page,
+    limit,
+    type,
+    statut,
+    masquee,
+    search,
+    zoneId,
+    categorieId,
+    auteurId,
+    q,
+    depuis,
+    jusqua,
+    tri,
+  } = filtres;
 
   const filtre = {};
 
@@ -253,14 +267,29 @@ async function getDeclarations(filtres) {
   if (search) {
     filtre.titre = { $regex: search, $options: "i" };
   }
+  // Filtres du binôme 4
+  if (zoneId) filtre.zoneId = zoneId;
+  if (categorieId) filtre.categorieId = categorieId;
+  if (auteurId) filtre.auteurId = auteurId;
+
+  // Recherche texte via l'index MongoDB idx_texte (titre + description)
+  if (q) filtre.$text = { $search: q };
+
+  if (depuis || jusqua) {
+    filtre.dateCreation = {};
+    if (depuis) filtre.dateCreation.$gte = depuis;
+    if (jusqua) filtre.dateCreation.$lte = jusqua;
+  }
+
+  const sens = tri === "ancien" ? 1 : -1;
 
   const [declarations, total] = await Promise.all([
     Declaration.find(filtre)
-      .populate("auteurId", "nom prenom")
+      .populate("auteurId", "nom prenom email actif")
       .populate("categorieId", "nom")
       .populate("zoneId", "nom emplacement")
       .populate("moderation.adminId", "nom prenom")
-      .sort({ dateCreation: -1 })
+      .sort({ dateCreation: sens })
       .skip((page - 1) * limit)
       .limit(limit),
 
