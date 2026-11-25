@@ -95,6 +95,8 @@ lf.createCollection("utilisateurs", {
         dateCreation: { bsonType: "date" },
         // Champ ajouté pour représenter l'héritage Membre / Administrateur
         role: { enum: ["MEMBRE", "ADMIN"] },
+        nbDeclarationsSemaine: { bsonType: "number", minimum: 0 },
+        debutSemaine: { bsonType: "date" },
       },
     },
   },

@@ -46,4 +46,6 @@ router.use("/admin/stats", require("./adminStatsRoutes"));
 router.use("/admin", require("./admin.routes"));
 router.use("/signalements", require("./signalement.routes"));
 
+// Binôme 5 : détection d'anomalies basée sur les graphes
+router.use("/admin", require("./anomalies"));
 module.exports = router;

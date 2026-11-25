@@ -6,8 +6,8 @@ Stack : Node.js / Express, MongoDB, React.
 
 ## Contexte
 
-
 ## Structure du dépôt
+
 ```
 lost-and-found-mall-v2/
 ├── backend/
@@ -29,6 +29,7 @@ lost-and-found-mall-v2/
 ```
 
 ## Installation
+
 1. `git clone <adresse du dépôt>`
 2. `cd backend`
 3. `npm install`
@@ -38,14 +39,13 @@ lost-and-found-mall-v2/
 7. Tester : http://localhost:3000/api/health
 
 ## Répartition
-| Binôme | Domaine | Branche |
-|---|---|---|
-| 1 | Utilisateurs, déclarations, sécurité | `binome1-users-declarations` |
-| 2 | Recherche et exploration | `binome2-search` |
-| 3 | Matching et résolution | `binome3-matching` |
-| 4 | Administration, modération, statistiques | `binome4-admin` |
 
-
+| Binôme | Domaine                                     | Branche                      |
+| ------ | ------------------------------------------- | ---------------------------- |
+| 1      | Utilisateurs, déclarations, sécurité        | `binome1-users-declarations` |
+| 2      | Recherche et exploration                    | `binome2-search`             |
+| 3      | Matching et résolution                      | `binome3-matching`           |
+| 4      | Administration, modération, statistiques    | `binome4-admin`              |
+| 5      | Détection d'anomalies basée sur les graphes | `monome5-anomaly-detection`  |
 
 ## Choix techniques et justifications
-
