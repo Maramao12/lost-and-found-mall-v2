@@ -7,29 +7,38 @@ const { searchQuerySchema } = require("../validators/searchValidator");
 const {
   referenceSearchQuerySchema,
 } = require("../validators/referenceSearchValidator");
+const {
+  memberHistoryQuerySchema,
+} = require("../validators/memberHistoryValidator");
 
 const router = express.Router();
 
-// Pas de recherche publique : il faut être connecté ET administrateur
-router.use(authenticate, authorize("ADMIN"));
+// Toutes les routes exigent d'être connecté
+router.use(authenticate);
 
-// GET /api/search?q=sac&type=TROUVE&page=1&limit=10
+// Historique du membre connecté (ses propres déclarations uniquement)
+router.get(
+  "/me/declarations",
+  validate(memberHistoryQuerySchema, "query"),
+  asyncHandler(ctrl.mesDeclarations),
+);
+
+// Recherches réservées à l'administrateur
 router.get(
   "/",
+  authorize("ADMIN"),
   validate(searchQuerySchema, "query"),
   asyncHandler(ctrl.search),
 );
-
-// GET /api/search/categories?q=sac&sort=nom_desc&page=1&limit=10
 router.get(
   "/categories",
+  authorize("ADMIN"),
   validate(referenceSearchQuerySchema, "query"),
   asyncHandler(ctrl.categories),
 );
-
-// GET /api/search/zones?q=food&sort=nom_asc&page=1&limit=10
 router.get(
   "/zones",
+  authorize("ADMIN"),
   validate(referenceSearchQuerySchema, "query"),
   asyncHandler(ctrl.zones),
 );

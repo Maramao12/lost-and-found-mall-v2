@@ -1,6 +1,7 @@
 const { searchDeclarations } = require("../services/search.service");
 const { searchCategories } = require("../services/categorySearch.service");
 const { searchZones } = require("../services/zoneSearch.service");
+const { getMemberHistory } = require("../services/memberHistory.service");
 
 // GET /api/search
 // Après validate(), req.query contient les valeurs nettoyées et les valeurs par défaut.
@@ -37,4 +38,18 @@ async function zones(req, res) {
   res.status(200).json(resultat);
 }
 
-module.exports = { search, categories, zones };
+// GET /api/search/me/declarations
+// L'identifiant du membre vient du jeton (req.user), JAMAIS de l'URL.
+async function mesDeclarations(req, res) {
+  const { q, sort, page, limit, ...filtres } = req.query;
+
+  const resultat = await getMemberHistory(
+    req.user._id,
+    { keyword: q, ...filtres },
+    { sort, page, limit },
+  );
+
+  res.status(200).json(resultat);
+}
+
+module.exports = { search, categories, zones, mesDeclarations };

@@ -147,6 +147,36 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Login Sarra",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"sarra@mail.tn\",\"motDePasse\":\"Membre12345\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -1377,6 +1407,400 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Historique du membre",
+      "item": [
+        {
+          "name": "Historique sans filtre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 28 : enregistrer les identifiants d'Amine\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst ids = pm.response.json().data.map(d => d._id);\r\npm.test(\"Au moins une déclaration\", () => pm.expect(ids.length).to.be.above(0));\r\npm.collectionVariables.set(\"idsAmine\", JSON.stringify(ids));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Historique de Sarra",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 29 : Sarra ne voit rien d'Amine, et aucune déclaration supprimée\r\npm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r\nconst data = pm.response.json().data;\r\nconst idsAmine = JSON.parse(pm.collectionVariables.get(\"idsAmine\"));\r\npm.test(\"Aucune déclaration d'Amine\", () =>\r\n  data.forEach(d => pm.expect(idsAmine).to.not.include(d._id)));\r\npm.test(\"Aucune déclaration supprimée\", () =>\r\n  data.forEach(d => pm.expect(d.statut).to.not.eql(\"SUPPRIMEE\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSarra}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mot-clé",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?q=sac",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "sac"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?type=PERDU",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "PERDU"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre statut",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?statut=PUBLIEE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "PUBLIEE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Période",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?dateDebut=2026-01-01&dateFin=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "dateDebut",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "dateFin",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri événement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?sort=evenement_ancien",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "evenement_ancien"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?page=1&limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aucun résultat",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?q=zzzzzzzz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "zzzzzzzz"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tentative d'usurpation (auteurId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?auteurId=000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "auteurId",
+                  "value": "000000000000000000000000"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statut SUPPRIMEE refusé",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?statut=SUPPRIMEE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "SUPPRIMEE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dates inversées",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?dateDebut=2026-12-01&dateFin=2026-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "dateDebut",
+                  "value": "2026-12-01"
+                },
+                {
+                  "key": "dateFin",
+                  "value": "2026-01-01"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Limit trop grand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations?limit=500",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "500"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sans jeton",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/me/declarations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "me",
+                "declarations"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{vault:tokenAmine}}",
+            "type": "string"
+          }
+        ]
+      }
     }
   ],
   "auth": {
@@ -1396,11 +1820,11 @@
     },
     {
       "key": "tokenAdmin",
-      "value": ""
+      "secret": true
     },
     {
       "key": "tokenAmine",
-      "value": ""
+      "secret": true
     },
     {
       "key": "categorieId",
@@ -1408,6 +1832,14 @@
     },
     {
       "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "tokenSarra",
+      "value": ""
+    },
+    {
+      "key": "idsAmine",
       "value": ""
     }
   ]
