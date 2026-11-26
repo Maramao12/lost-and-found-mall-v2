@@ -18,6 +18,10 @@ const Declaration = require("../models/Declaration");
 const Notification = require("../models/Notification");
 const AppError = require("../utils/AppError");
 const Utilisateur = require("../models/Utilisateur");
+const {
+  construireRequeteRecherche,
+  construireTri,
+} = require("./search.service");
 
 // =====================================================================
 // OUTIL : vérifier l'existence d'un signalement
@@ -237,25 +241,29 @@ async function getDeclarations(filtres) {
     statut,
     masquee,
     search,
-    zoneId,
-    categorieId,
     auteurId,
     q,
-    depuis,
-    jusqua,
-    tri,
+    zoneId,
+    categorieId,
+    dateDebut,
+    dateFin,
+    sort,
   } = filtres;
 
-  const filtre = {};
+  // Moteur du binôme 2 : texte (index idx_texte), type, statut, catégorie,
+  // zone et dates de l'événement. Même logique et mêmes erreurs que /api/search.
+  const filtre = construireRequeteRecherche({
+    keyword: q,
+    type,
+    statut,
+    zoneId,
+    categorieId,
+    dateDebut,
+    dateFin,
+  });
+  const tri = construireTri(sort);
 
-  if (type) {
-    filtre.type = type;
-  }
-
-  if (statut) {
-    filtre.statut = statut;
-  }
-
+  // Filtres propres à la supervision et à la modération
   if (masquee === "true") {
     filtre["moderation.estMasquee"] = true;
   }
@@ -267,29 +275,26 @@ async function getDeclarations(filtres) {
   if (search) {
     filtre.titre = { $regex: search, $options: "i" };
   }
-  // Filtres du binôme 4
-  if (zoneId) filtre.zoneId = zoneId;
-  if (categorieId) filtre.categorieId = categorieId;
-  if (auteurId) filtre.auteurId = auteurId;
 
-  // Recherche texte via l'index MongoDB idx_texte (titre + description)
-  if (q) filtre.$text = { $search: q };
-
-  if (depuis || jusqua) {
-    filtre.dateCreation = {};
-    if (depuis) filtre.dateCreation.$gte = depuis;
-    if (jusqua) filtre.dateCreation.$lte = jusqua;
+  if (auteurId) {
+    filtre.auteurId = auteurId;
   }
 
-  const sens = tri === "ancien" ? 1 : -1;
+  // Avec un mot-clé, les résultats les plus pertinents passent d'abord
+  const avecTexte = Boolean(q && q.trim());
+  let requete = avecTexte
+    ? Declaration.find(filtre, { score: { $meta: "textScore" } }).sort({
+        score: { $meta: "textScore" },
+        ...tri,
+      })
+    : Declaration.find(filtre).sort(tri);
 
   const [declarations, total] = await Promise.all([
-    Declaration.find(filtre)
+    requete
       .populate("auteurId", "nom prenom email actif")
       .populate("categorieId", "nom")
       .populate("zoneId", "nom emplacement")
       .populate("moderation.adminId", "nom prenom")
-      .sort({ dateCreation: sens })
       .skip((page - 1) * limit)
       .limit(limit),
 

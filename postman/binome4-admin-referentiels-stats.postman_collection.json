@@ -1,7 +1,7 @@
 {
   "info": {
-    "_postman_id": "798ecddf-edcf-4c71-b391-aa1d166e6a91",
-    "name": "Binôme 4 - Administration, Référentiels & Statistiques",
+    "_postman_id": "6a161aba-b52e-4a63-836f-fd88f1460ca9",
+    "name": "Binôme 4 - Administration, Référentiels & Statistiques Copy",
     "description": "Scénario d'exécution pour la soutenance.\n\n1. Démarrer le serveur (npm run dev) et charger la base de démonstration.\n2. Créer l'admin : node scripts/create-user.js admin@lostfound.tn Admin12345 ADMIN Admin Test\n3. Lancer le Collection Runner dans l'ordre des dossiers (00 puis 01, 02, 03, 04).\n\nLes jetons admin et membre se renouvellent automatiquement (script de pré-requête de la collection).\n\nChaque requête contient des tests automatiques (statut HTTP, format de réponse, cohérence des chiffres).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "36368235"
@@ -177,7 +177,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });\nconst j = pm.response.json();\npm.test(\"Réponse : liste dans data\", function () {\n  pm.expect(j.success).to.eql(true);\n  pm.expect(j.data).to.be.an(\"array\");\n});\n// Mémorise un élément déjà utilisé par des déclarations (données de démonstration)\nconst u = j.data.find(function (x) { return x.nom === \"Food court\"; });\nif (u) { pm.collectionVariables.set(\"zoneUtiliseeId\", u._id); }\n"
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse : liste dans data\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "});",
+                  "// Mémorise un élément déjà utilisé par des déclarations (données de démonstration)",
+                  "const u = j.data.find(function (x) { return x.nom === \"Food court\"; });",
+                  "if (u) { pm.collectionVariables.set(\"zoneUtiliseeId\", u._id); }"
                 ]
               }
             }
@@ -905,7 +913,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });\nconst j = pm.response.json();\npm.test(\"Réponse : liste dans data\", function () {\n  pm.expect(j.success).to.eql(true);\n  pm.expect(j.data).to.be.an(\"array\");\n});\n// Mémorise un élément déjà utilisé par des déclarations (données de démonstration)\nconst u = j.data.find(function (x) { return x.nom === \"Sacs\"; });\nif (u) { pm.collectionVariables.set(\"categorieUtiliseeId\", u._id); }"
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse : liste dans data\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "});",
+                  "// Mémorise un élément déjà utilisé par des déclarations (données de démonstration)",
+                  "const u = j.data.find(function (x) { return x.nom === \"Sacs\"; });",
+                  "if (u) { pm.collectionVariables.set(\"categorieUtiliseeId\", u._id); }"
                 ]
               }
             }
@@ -2460,7 +2476,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/declarations?tri=recent",
+              "raw": "{{baseUrl}}/admin/declarations?sort=recent",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2470,7 +2486,7 @@
               ],
               "query": [
                 {
-                  "key": "tri",
+                  "key": "sort",
                   "value": "recent"
                 }
               ]
@@ -2507,7 +2523,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/declarations?tri=ancien",
+              "raw": "{{baseUrl}}/admin/declarations?sort=ancien",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2517,8 +2533,102 @@
               ],
               "query": [
                 {
-                  "key": "tri",
+                  "key": "sort",
                   "value": "ancien"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri par date de l'événement, du plus récent au plus ancien",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse paginée cohérente\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "  pm.expect(j.pagination.total).to.be.a(\"number\");",
+                  "  pm.expect(j.data.length).to.be.at.most(j.pagination.limit);",
+                  "  pm.expect(j.pagination.pages).to.eql(Math.max(1, Math.ceil(j.pagination.total / j.pagination.limit)));",
+                  "});",
+                  "pm.test(\"Dates d'événement décroissantes\", function () {",
+                  "  const t = pm.response.json().data.map(function (d) { return new Date(d.dateEvenement).getTime(); });",
+                  "  pm.expect(t).to.eql(t.slice().sort(function (a, b) { return b - a; }));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/declarations?sort=evenement_recent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "evenement_recent"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tri par date de l'événement, du plus ancien au plus récent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse paginée cohérente\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "  pm.expect(j.pagination.total).to.be.a(\"number\");",
+                  "  pm.expect(j.data.length).to.be.at.most(j.pagination.limit);",
+                  "  pm.expect(j.pagination.pages).to.eql(Math.max(1, Math.ceil(j.pagination.total / j.pagination.limit)));",
+                  "});",
+                  "pm.test(\"Dates d'événement croissantes\", function () {",
+                  "  const t = pm.response.json().data.map(function (d) { return new Date(d.dateEvenement).getTime(); });",
+                  "  pm.expect(t).to.eql(t.slice().sort(function (a, b) { return a - b; }));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/declarations?sort=evenement_ancien",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "evenement_ancien"
                 }
               ]
             }
@@ -2762,18 +2872,8 @@
           "response": []
         },
         {
-          "name": "Filtre par période (7 derniers jours)",
+          "name": "Filtre par date de l'événement (large période)",
           "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.collectionVariables.set(\"declDepuis\", new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10));",
-                  "pm.collectionVariables.set(\"declJusqua\", new Date(Date.now() + 864e5).toISOString().slice(0, 10));"
-                ]
-              }
-            },
             {
               "listen": "test",
               "script": {
@@ -2788,8 +2888,8 @@
                   "  pm.expect(j.data.length).to.be.at.most(j.pagination.limit);",
                   "  pm.expect(j.pagination.pages).to.eql(Math.max(1, Math.ceil(j.pagination.total / j.pagination.limit)));",
                   "});",
-                  "pm.test(\"Toutes sont dans la période\", function () {",
-                  "  pm.response.json().data.forEach(function (d) { pm.expect(new Date(d.dateCreation) >= new Date(pm.collectionVariables.get(\"declDepuis\")) && new Date(d.dateCreation) <= new Date(pm.collectionVariables.get(\"declJusqua\"))).to.eql(true); });",
+                  "pm.test(\"Toutes les dates d'événement sont dans la période\", function () {",
+                  "  pm.response.json().data.forEach(function (d) { pm.expect(new Date(d.dateEvenement) >= new Date(\"2000-01-01\") && new Date(d.dateEvenement) <= new Date(\"2100-12-31T23:59:59\")).to.eql(true); });",
                   "});"
                 ]
               }
@@ -2799,7 +2899,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/declarations?depuis={{declDepuis}}&jusqua={{declJusqua}}",
+              "raw": "{{baseUrl}}/admin/declarations?dateDebut=2000-01-01&dateFin=2100-12-31",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2809,12 +2909,156 @@
               ],
               "query": [
                 {
-                  "key": "depuis",
-                  "value": "{{declDepuis}}"
+                  "key": "dateDebut",
+                  "value": "2000-01-01"
                 },
                 {
-                  "key": "jusqua",
-                  "value": "{{declJusqua}}"
+                  "key": "dateFin",
+                  "value": "2100-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre par date de l'événement (période sans déclaration)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse paginée cohérente\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "  pm.expect(j.pagination.total).to.be.a(\"number\");",
+                  "  pm.expect(j.data.length).to.be.at.most(j.pagination.limit);",
+                  "  pm.expect(j.pagination.pages).to.eql(Math.max(1, Math.ceil(j.pagination.total / j.pagination.limit)));",
+                  "});",
+                  "pm.test(\"Liste vide et total 0\", function () {",
+                  "  const j = pm.response.json();",
+                  "  pm.expect(j.data).to.have.lengthOf(0);",
+                  "  pm.expect(j.pagination.total).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/declarations?dateDebut=2099-01-01&dateFin=2099-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "dateDebut",
+                  "value": "2099-01-01"
+                },
+                {
+                  "key": "dateFin",
+                  "value": "2099-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre : déclarations non masquées",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse paginée cohérente\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "  pm.expect(j.pagination.total).to.be.a(\"number\");",
+                  "  pm.expect(j.data.length).to.be.at.most(j.pagination.limit);",
+                  "  pm.expect(j.pagination.pages).to.eql(Math.max(1, Math.ceil(j.pagination.total / j.pagination.limit)));",
+                  "});",
+                  "pm.test(\"Aucune n'est masquée\", function () {",
+                  "  pm.response.json().data.forEach(function (d) { pm.expect(!(d.moderation && d.moderation.estMasquee === true)).to.eql(true); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/declarations?masquee=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "masquee",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtre : déclarations masquées",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Réponse paginée cohérente\", function () {",
+                  "  pm.expect(j.success).to.eql(true);",
+                  "  pm.expect(j.data).to.be.an(\"array\");",
+                  "  pm.expect(j.pagination.total).to.be.a(\"number\");",
+                  "  pm.expect(j.data.length).to.be.at.most(j.pagination.limit);",
+                  "  pm.expect(j.pagination.pages).to.eql(Math.max(1, Math.ceil(j.pagination.total / j.pagination.limit)));",
+                  "});",
+                  "pm.test(\"Toutes sont masquées\", function () {",
+                  "  pm.response.json().data.forEach(function (d) { pm.expect(d.moderation && d.moderation.estMasquee === true).to.eql(true); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/declarations?masquee=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "masquee",
+                  "value": "true"
                 }
               ]
             }
@@ -3231,7 +3475,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/declarations?depuis=pasunedate",
+              "raw": "{{baseUrl}}/admin/declarations?dateDebut=pasunedate",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3241,8 +3485,53 @@
               ],
               "query": [
                 {
-                  "key": "depuis",
+                  "key": "dateDebut",
                   "value": "pasunedate"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erreur : dates inversées (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Format d'erreur cohérent (code INVALID_DATE_RANGE)\", function () {",
+                  "  const j = pm.response.json();",
+                  "  pm.expect(j.success).to.eql(false);",
+                  "  pm.expect(j.error.code).to.eql(\"INVALID_DATE_RANGE\");",
+                  "  pm.expect(j.error.message).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/declarations?dateDebut=2026-12-01&dateFin=2026-11-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "declarations"
+              ],
+              "query": [
+                {
+                  "key": "dateDebut",
+                  "value": "2026-12-01"
+                },
+                {
+                  "key": "dateFin",
+                  "value": "2026-11-01"
                 }
               ]
             }
@@ -3272,7 +3561,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/declarations?tri=hier",
+              "raw": "{{baseUrl}}/admin/declarations?sort=hier",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3282,7 +3571,7 @@
               ],
               "query": [
                 {
-                  "key": "tri",
+                  "key": "sort",
                   "value": "hier"
                 }
               ]
@@ -3505,7 +3794,7 @@
     },
     {
       "key": "memberToken",
-      "secret": true
+      "value": ""
     },
     {
       "key": "zoneId",
@@ -3549,14 +3838,6 @@
     },
     {
       "key": "declSacAuteurId",
-      "value": ""
-    },
-    {
-      "key": "declDepuis",
-      "value": ""
-    },
-    {
-      "key": "declJusqua",
       "value": ""
     }
   ]
