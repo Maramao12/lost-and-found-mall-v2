@@ -75,6 +75,10 @@ const resolveReportSchema = z
 // GET /api/admin/declarations
 // Filtrage des déclarations
 // ---------------------------------------------------------------------
+const dateJour = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date : format YYYY-MM-DD attendu");
+
 const listDeclarationsSchema = paginationSchema.extend({
   type: z.enum(["PERDU", "TROUVE"]).optional(),
 
@@ -82,21 +86,26 @@ const listDeclarationsSchema = paginationSchema.extend({
 
   masquee: z.enum(["true", "false"]).optional(),
 
+  // Recherche regex sur le titre (existante, conservée)
   search: z.string().trim().max(100).optional(),
 
-  // Filtres ajoutés par le binôme 4 (statistiques / supervision)
-  zoneId: objectId.optional(),
-  categorieId: objectId.optional(),
-  auteurId: objectId.optional(),
+  // Moteur de recherche du binôme 2 (search.service)
   q: z
     .string()
     .trim()
     .min(2, "Recherche : 2 caractères minimum")
     .max(100)
     .optional(),
-  depuis: z.coerce.date().optional(),
-  jusqua: z.coerce.date().optional(),
-  tri: z.enum(["recent", "ancien"]).default("recent"),
+  zoneId: objectId.optional(),
+  categorieId: objectId.optional(),
+  dateDebut: dateJour.optional(), // date de perte / découverte
+  dateFin: dateJour.optional(),
+  sort: z
+    .enum(["recent", "ancien", "evenement_recent", "evenement_ancien"])
+    .default("recent"),
+
+  // Propre à la supervision admin
+  auteurId: objectId.optional(),
 });
 
 // ---------------------------------------------------------------------

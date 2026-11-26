@@ -12,8 +12,7 @@
    - Pagination
    - Comptage du nombre total de résultats
 
-   Ce service est utilisé par le Binôme 4 via le contrôleur
-   du Binôme 2. Il ne réalise pas le matching.
+   Ce service ne réalise pas le matching.
    ===================================================================== */
 
 const mongoose = require("mongoose");
@@ -22,6 +21,7 @@ const Declaration = require("../models/Declaration");
 const Categorie = require("../models/Categorie");
 const Zone = require("../models/Zone");
 const Utilisateur = require("../models/Utilisateur");
+const AppError = require("../utils/AppError");
 
 // ================================================================
 // 1. Valeurs autorisées
@@ -43,30 +43,36 @@ const TRIS_AUTORISES = [
 // ================================================================
 
 function verifierObjectId(valeur, nomChamp) {
-  if (!mongoose.Types.ObjectId.isValid(valeur)) {
-    throw new Error(`${nomChamp} doit être un identifiant MongoDB valide.`);
+  if (typeof valeur !== "string" || !mongoose.Types.ObjectId.isValid(valeur)) {
+    throw new AppError(
+      400,
+      "INVALID_ID",
+      `${nomChamp} doit être un identifiant MongoDB valide.`,
+    );
   }
 
   return new mongoose.Types.ObjectId(valeur);
 }
 
 // ================================================================
-// 3. Conversion des dates
+// 3. Conversion et validation des dates
 // ================================================================
 
 function convertirDate(valeur, nomChamp, finDeJournee = false) {
-  if (!valeur) {
+  if (valeur === undefined || valeur === null || valeur === "") {
     return null;
   }
 
-  // Le format attendu est YYYY-MM-DD.
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(valeur)) {
-    throw new Error(`${nomChamp} doit respecter le format YYYY-MM-DD.`);
+  if (typeof valeur !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valeur)) {
+    throw new AppError(
+      400,
+      "INVALID_DATE",
+      `${nomChamp} doit respecter le format YYYY-MM-DD.`,
+    );
   }
 
   const [annee, mois, jour] = valeur.split("-").map(Number);
 
-  // Utiliser les dates locales pour inclure toute la journée.
   const date = finDeJournee
     ? new Date(annee, mois - 1, jour, 23, 59, 59, 999)
     : new Date(annee, mois - 1, jour, 0, 0, 0, 0);
@@ -77,7 +83,11 @@ function convertirDate(valeur, nomChamp, finDeJournee = false) {
     date.getMonth() !== mois - 1 ||
     date.getDate() !== jour
   ) {
-    throw new Error(`${nomChamp} n'est pas une date valide.`);
+    throw new AppError(
+      400,
+      "INVALID_DATE",
+      `${nomChamp} n'est pas une date valide.`,
+    );
   }
 
   return date;
@@ -90,11 +100,7 @@ function convertirDate(valeur, nomChamp, finDeJournee = false) {
 function construireRequeteRecherche(filtres = {}) {
   const query = {};
 
-  // --------------------------------------------------------------
-  // Recherche textuelle dans titre et description
-  // Utilise l'index textuel "idx_texte" du script MongoDB.
-  // --------------------------------------------------------------
-
+  // Recherche textuelle dans titre et description.
   if (filtres.keyword && filtres.keyword.trim()) {
     query.$text = {
       $search: filtres.keyword.trim(),
@@ -102,58 +108,51 @@ function construireRequeteRecherche(filtres = {}) {
     };
   }
 
-  // --------------------------------------------------------------
-  // Filtre par type : PERDU ou TROUVE
-  // --------------------------------------------------------------
-
+  // Filtre par type.
   if (filtres.type) {
     if (!TYPES_AUTORISES.includes(filtres.type)) {
-      throw new Error("Type invalide : PERDU ou TROUVE attendu.");
+      throw new AppError(
+        400,
+        "INVALID_TYPE",
+        "Type invalide : PERDU ou TROUVE attendu.",
+      );
     }
 
     query.type = filtres.type;
   }
 
-  // --------------------------------------------------------------
-  // Filtre par statut
-  // Aucun statut n'est imposé automatiquement.
-  // --------------------------------------------------------------
-
+  // Filtre par statut.
   if (filtres.statut) {
     if (!STATUTS_AUTORISES.includes(filtres.statut)) {
-      throw new Error("Statut de déclaration invalide.");
+      throw new AppError(
+        400,
+        "INVALID_STATUS",
+        "Statut de déclaration invalide.",
+      );
     }
 
     query.statut = filtres.statut;
   }
 
-  // --------------------------------------------------------------
-  // Filtre par catégorie
-  // --------------------------------------------------------------
-
+  // Filtre par catégorie.
   if (filtres.categorieId) {
     query.categorieId = verifierObjectId(filtres.categorieId, "categorieId");
   }
 
-  // --------------------------------------------------------------
-  // Filtre par zone
-  // --------------------------------------------------------------
-
+  // Filtre par zone.
   if (filtres.zoneId) {
     query.zoneId = verifierObjectId(filtres.zoneId, "zoneId");
   }
 
-  // --------------------------------------------------------------
-  // Filtre par date de perte / découverte
-  // Champ utilisé : dateEvenement
-  // --------------------------------------------------------------
-
+  // Filtre par date de perte / découverte.
   const dateDebut = convertirDate(filtres.dateDebut, "dateDebut");
 
   const dateFin = convertirDate(filtres.dateFin, "dateFin", true);
 
   if (dateDebut && dateFin && dateDebut > dateFin) {
-    throw new Error(
+    throw new AppError(
+      400,
+      "INVALID_DATE_RANGE",
       "La date de début doit être antérieure ou égale à la date de fin.",
     );
   }
@@ -177,27 +176,23 @@ function construireRequeteRecherche(filtres = {}) {
 // 5. Définir le tri
 // ================================================================
 
-function construireTri(sort) {
+function construireTri(sort = "recent") {
   const tris = {
-    // Date de publication : plus récente en premier
     recent: {
       dateCreation: -1,
       _id: -1,
     },
 
-    // Date de publication : plus ancienne en premier
     ancien: {
       dateCreation: 1,
       _id: 1,
     },
 
-    // Date de perte / découverte : plus récente en premier
     evenement_recent: {
       dateEvenement: -1,
       _id: -1,
     },
 
-    // Date de perte / découverte : plus ancienne en premier
     evenement_ancien: {
       dateEvenement: 1,
       _id: 1,
@@ -205,7 +200,9 @@ function construireTri(sort) {
   };
 
   if (!TRIS_AUTORISES.includes(sort)) {
-    throw new Error(
+    throw new AppError(
+      400,
+      "INVALID_SORT",
       "Tri invalide. Valeurs acceptées : " + TRIS_AUTORISES.join(", "),
     );
   }
@@ -218,40 +215,36 @@ function construireTri(sort) {
 // ================================================================
 
 async function searchDeclarations(filtres = {}, options = {}) {
-  // --------------------------------------------------------------
-  // Pagination
-  // --------------------------------------------------------------
-
+  // Pagination.
   const page = Number(options.page ?? 1);
   const limit = Number(options.limit ?? 10);
 
   if (!Number.isInteger(page) || page < 1) {
-    throw new Error("La page doit être un entier supérieur ou égal à 1.");
+    throw new AppError(
+      400,
+      "INVALID_PAGE",
+      "La page doit être un entier supérieur ou égal à 1.",
+    );
   }
 
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    throw new Error("La limite doit être comprise entre 1 et 100.");
+    throw new AppError(
+      400,
+      "INVALID_LIMIT",
+      "La limite doit être comprise entre 1 et 100.",
+    );
   }
 
-  // --------------------------------------------------------------
-  // Tri
-  // --------------------------------------------------------------
-
+  // Tri.
   const sort = options.sort ?? "recent";
   const tri = construireTri(sort);
 
-  // --------------------------------------------------------------
-  // Construction de la requête
-  // --------------------------------------------------------------
-
+  // Construction de la requête.
   const query = construireRequeteRecherche(filtres);
 
   const skip = (page - 1) * limit;
 
-  // --------------------------------------------------------------
-  // Projection : champs utiles pour l'administration
-  // --------------------------------------------------------------
-
+  // Projection des champs utiles à l'administration.
   const projection = {
     type: 1,
     titre: 1,
@@ -266,22 +259,16 @@ async function searchDeclarations(filtres = {}, options = {}) {
     zoneId: 1,
   };
 
-  // Avec une recherche textuelle, récupérer aussi le score
-  // de pertinence calculé par MongoDB.
+  // Ajouter le score de pertinence si un mot-clé est fourni.
   if (filtres.keyword && filtres.keyword.trim()) {
     projection.score = {
       $meta: "textScore",
     };
   }
 
-  // --------------------------------------------------------------
-  // Requête de recherche + comptage en parallèle
-  // --------------------------------------------------------------
-
+  // Recherche et comptage en parallèle.
   let requeteDeclarations = Declaration.find(query, projection);
 
-  // Si un mot-clé est fourni, les résultats les plus pertinents
-  // apparaissent en premier, puis le tri choisi départage les résultats.
   if (filtres.keyword && filtres.keyword.trim()) {
     requeteDeclarations = requeteDeclarations.sort({
       score: { $meta: "textScore" },
@@ -303,17 +290,11 @@ async function searchDeclarations(filtres = {}, options = {}) {
     Declaration.countDocuments(query),
   ]);
 
-  // --------------------------------------------------------------
-  // Informations de pagination
-  // --------------------------------------------------------------
-
   const totalPages = Math.ceil(total / limit);
 
   return {
     success: true,
-
     data: declarations,
-
     pagination: {
       page,
       limit,
@@ -331,4 +312,6 @@ async function searchDeclarations(filtres = {}, options = {}) {
 
 module.exports = {
   searchDeclarations,
+  construireRequeteRecherche,
+  construireTri,
 };

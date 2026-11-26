@@ -38,6 +38,13 @@ function construireTriZone(sort) {
   return tris[sort] || tris.nom_asc;
 }
 
+// Collation : tri alphabétique français sans distinction
+// entre majuscules et minuscules.
+const COLLATION_FR = {
+  locale: "fr",
+  strength: 2,
+};
+
 // Recherche les zones avec pagination.
 async function searchZones(filtres = {}, options = {}) {
   const page = Math.max(1, parseInt(options.page, 10) || 1);
@@ -49,7 +56,12 @@ async function searchZones(filtres = {}, options = {}) {
   const tri = construireTriZone(options.sort);
 
   const [zones, total] = await Promise.all([
-    Zone.find(query).sort(tri).skip(skip).limit(limit).lean(),
+    Zone.find(query)
+      .collation(COLLATION_FR)
+      .sort(tri)
+      .skip(skip)
+      .limit(limit)
+      .lean(),
 
     Zone.countDocuments(query),
   ]);
