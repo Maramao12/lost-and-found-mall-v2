@@ -74,4 +74,4 @@ const searchQuerySchema = z
     },
   );
 
-module.exports = { searchQuerySchema };
+module.exports = { searchQuerySchema, objectId, dateJour, TRIS };
