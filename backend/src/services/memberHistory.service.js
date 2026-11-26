@@ -2,29 +2,51 @@
  * src/services/memberHistory.service.js
  *
  * Recherche et filtrage des déclarations du membre connecté.
- * IMPORTANT : memberId doit provenir de l'utilisateur connecté
- * (req.user.id ou req.user._id), jamais d'une valeur libre
- * envoyée par le membre.
+ * IMPORTANT : memberId doit provenir de l'utilisateur connecté.
+ * Les déclarations SUPPRIMEE sont exclues de l'historique.
  * ============================================================ */
 
 const mongoose = require("mongoose");
 const Declaration = require("../models/Declaration");
+const AppError = require("../utils/AppError");
 
 // Échappe les caractères spéciaux d'une expression régulière.
 function echapperRegex(texte) {
   return texte.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Vérifie et convertit une date.
-function convertirDate(valeur, nomChamp) {
+// Vérifie et convertit une date au format YYYY-MM-DD.
+// Si finDeJournee vaut true, toute la journée est incluse.
+function convertirDate(valeur, nomChamp, finDeJournee = false) {
   if (valeur === undefined || valeur === null || valeur === "") {
     return null;
   }
 
-  const date = new Date(valeur);
+  if (typeof valeur !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valeur)) {
+    throw new AppError(
+      400,
+      "INVALID_DATE",
+      `${nomChamp} doit respecter le format YYYY-MM-DD.`,
+    );
+  }
 
-  if (Number.isNaN(date.getTime())) {
-    throw new Error(`La date ${nomChamp} est invalide.`);
+  const [annee, mois, jour] = valeur.split("-").map(Number);
+
+  const date = finDeJournee
+    ? new Date(annee, mois - 1, jour, 23, 59, 59, 999)
+    : new Date(annee, mois - 1, jour, 0, 0, 0, 0);
+
+  // Vérifie que la date existe réellement.
+  if (
+    date.getFullYear() !== annee ||
+    date.getMonth() !== mois - 1 ||
+    date.getDate() !== jour
+  ) {
+    throw new AppError(
+      400,
+      "INVALID_DATE",
+      `${nomChamp} n'est pas une date valide.`,
+    );
   }
 
   return date;
@@ -33,21 +55,27 @@ function convertirDate(valeur, nomChamp) {
 // Vérifie et convertit un identifiant MongoDB.
 function convertirObjectId(valeur, nomChamp) {
   if (!mongoose.Types.ObjectId.isValid(valeur)) {
-    throw new Error(`${nomChamp} est invalide.`);
+    throw new AppError(400, "INVALID_ID", `${nomChamp} est invalide.`);
   }
 
   return new mongoose.Types.ObjectId(valeur);
 }
 
 // Construit les filtres de l'historique.
-function construireFiltresHistorique(filtres, memberId) {
+function construireFiltresHistorique(filtres = {}, memberId) {
   if (!memberId || !mongoose.Types.ObjectId.isValid(memberId)) {
-    throw new Error("L'identifiant du membre est invalide.");
+    throw new AppError(
+      400,
+      "INVALID_MEMBER_ID",
+      "L'identifiant du membre est invalide.",
+    );
   }
 
-  // Ce filtre est obligatoire : il limite les résultats au membre connecté.
+  // Le membre ne peut consulter que ses propres déclarations.
+  // Les déclarations supprimées sont toujours exclues.
   const query = {
     auteurId: new mongoose.Types.ObjectId(memberId),
+    statut: { $ne: "SUPPRIMEE" },
   };
 
   // Recherche textuelle dans titre et description.
@@ -58,42 +86,58 @@ function construireFiltresHistorique(filtres, memberId) {
     };
   }
 
+  // Filtre par type.
   if (filtres.type) {
     if (!["PERDU", "TROUVE"].includes(filtres.type)) {
-      throw new Error("Le type doit être PERDU ou TROUVE.");
+      throw new AppError(
+        400,
+        "INVALID_TYPE",
+        "Le type doit être PERDU ou TROUVE.",
+      );
     }
 
     query.type = filtres.type;
   }
 
+  // Filtre par statut : SUPPRIMEE n'est pas autorisé.
   if (filtres.statut) {
-    const statutsAutorises = ["PUBLIEE", "EN_COURS", "RESTITUEE", "SUPPRIMEE"];
+    const statutsAutorises = ["PUBLIEE", "EN_COURS", "RESTITUEE"];
 
     if (!statutsAutorises.includes(filtres.statut)) {
-      throw new Error("Le statut fourni est invalide.");
+      throw new AppError(
+        400,
+        "INVALID_STATUS",
+        "Statut invalide ou non autorisé dans l'historique.",
+      );
     }
 
     query.statut = filtres.statut;
   }
 
+  // Filtre par catégorie.
   if (filtres.categorieId) {
     query.categorieId = convertirObjectId(filtres.categorieId, "categorieId");
   }
 
+  // Filtre par zone.
   if (filtres.zoneId) {
     query.zoneId = convertirObjectId(filtres.zoneId, "zoneId");
   }
 
-  // Filtrage sur la date à laquelle l'objet a été perdu ou trouvé.
+  // Filtrage sur la date de perte ou de découverte.
   const debutEvenement = convertirDate(filtres.dateDebut, "dateDebut");
 
-  const finEvenement = convertirDate(filtres.dateFin, "dateFin");
+  const finEvenement = convertirDate(filtres.dateFin, "dateFin", true);
+
+  if (debutEvenement && finEvenement && debutEvenement > finEvenement) {
+    throw new AppError(
+      400,
+      "INVALID_DATE_RANGE",
+      "dateDebut doit être antérieure ou égale à dateFin.",
+    );
+  }
 
   if (debutEvenement || finEvenement) {
-    if (debutEvenement && finEvenement && debutEvenement > finEvenement) {
-      throw new Error("dateDebut doit être antérieure à dateFin.");
-    }
-
     query.dateEvenement = {};
 
     if (debutEvenement) {
@@ -105,21 +149,27 @@ function construireFiltresHistorique(filtres, memberId) {
     }
   }
 
-  // Filtrage facultatif sur la date de création de la déclaration.
+  // Filtrage facultatif sur la date de création.
   const debutCreation = convertirDate(
     filtres.dateCreationDebut,
     "dateCreationDebut",
   );
 
-  const finCreation = convertirDate(filtres.dateCreationFin, "dateCreationFin");
+  const finCreation = convertirDate(
+    filtres.dateCreationFin,
+    "dateCreationFin",
+    true,
+  );
+
+  if (debutCreation && finCreation && debutCreation > finCreation) {
+    throw new AppError(
+      400,
+      "INVALID_DATE_RANGE",
+      "dateCreationDebut doit être antérieure ou égale à dateCreationFin.",
+    );
+  }
 
   if (debutCreation || finCreation) {
-    if (debutCreation && finCreation && debutCreation > finCreation) {
-      throw new Error(
-        "dateCreationDebut doit être antérieure à dateCreationFin.",
-      );
-    }
-
     query.dateCreation = {};
 
     if (debutCreation) {
@@ -135,7 +185,7 @@ function construireFiltresHistorique(filtres, memberId) {
 }
 
 // Définit le tri.
-function construireTriHistorique(sort) {
+function construireTriHistorique(sort = "recent") {
   const tris = {
     recent: { dateCreation: -1, _id: -1 },
     ancien: { dateCreation: 1, _id: 1 },
@@ -143,21 +193,47 @@ function construireTriHistorique(sort) {
     evenement_ancien: { dateEvenement: 1, _id: 1 },
   };
 
-  return tris[sort] || tris.recent;
+  if (!tris[sort]) {
+    throw new AppError(
+      400,
+      "INVALID_SORT",
+      "Tri invalide. Valeurs acceptées : " + Object.keys(tris).join(", "),
+    );
+  }
+
+  return tris[sort];
 }
 
 // Recherche l'historique du membre connecté.
 async function getMemberHistory(memberId, filtres = {}, options = {}) {
-  const page = Math.max(1, parseInt(options.page, 10) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(options.limit, 10) || 10));
+  const page = Number(options.page ?? 1);
+  const limit = Number(options.limit ?? 10);
+
+  if (!Number.isInteger(page) || page < 1) {
+    throw new AppError(
+      400,
+      "INVALID_PAGE",
+      "La page doit être un entier supérieur ou égal à 1.",
+    );
+  }
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new AppError(
+      400,
+      "INVALID_LIMIT",
+      "La limite doit être comprise entre 1 et 100.",
+    );
+  }
 
   const skip = (page - 1) * limit;
   const query = construireFiltresHistorique(filtres, memberId);
-  const tri = construireTriHistorique(options.sort);
+  const tri = construireTriHistorique(options.sort || "recent");
 
   let requete = Declaration.find(
     query,
-    filtres.keyword ? { score: { $meta: "textScore" } } : {},
+    filtres.keyword && filtres.keyword.trim()
+      ? { score: { $meta: "textScore" } }
+      : {},
   );
 
   if (filtres.keyword && filtres.keyword.trim()) {
