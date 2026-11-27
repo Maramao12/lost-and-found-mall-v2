@@ -407,7 +407,13 @@ async function confirmerRestitution(req, res, next) {
         .status(404)
         .json({ success: false, message: "Correspondance introuvable." });
     }
-    if (!estProprietaire(corr, req.user) && !estTrouveur(corr, req.user)) {
+    // Restitution confirmée par le propriétaire, le trouveur
+    // ou l'accueil du centre commercial (admin)
+    if (
+      !estProprietaire(corr, req.user) &&
+      !estTrouveur(corr, req.user) &&
+      !estAdmin(req.user)
+    ) {
       return res.status(403).json({ success: false, message: "Accès refusé." });
     }
     if (corr.statut !== "ACCEPTEE") {
@@ -416,6 +422,22 @@ async function confirmerRestitution(req, res, next) {
         .json({
           success: false,
           message: "Seule une correspondance acceptée peut être restituée.",
+        });
+    }
+
+    // Empêcher de confirmer deux fois la même restitution
+    const dejaRestituee = await Declaration.countDocuments({
+      _id: {
+        $in: [corr.declarationPerdueId._id, corr.declarationTrouveeId._id],
+      },
+      statut: "RESTITUEE",
+    });
+    if (dejaRestituee > 0) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "La restitution de cet objet a déjà été confirmée.",
         });
     }
 
