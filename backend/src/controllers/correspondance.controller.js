@@ -39,6 +39,59 @@ function estAdmin(user) {
   return user && user.role === "ADMIN";
 }
 
+// ---------------------------------------------------------------------
+// Annule les correspondances encore ouvertes (PROPOSEE / A_VERIFIER)
+// liées à une ou plusieurs déclarations, et prévient l'autre personne.
+//  - declarationIds : déclarations concernées
+//  - exclureId      : correspondance à ne pas annuler (celle acceptée)
+//  - motif          : raison enregistrée dans motifRefus
+// Retourne le nombre de correspondances annulées.
+// ---------------------------------------------------------------------
+async function annulerCorrespondancesOuvertes({ declarationIds, exclureId, motif }) {
+  const ids = declarationIds.map(String);
+
+  const filtre = {
+    statut: { $in: ["PROPOSEE", "A_VERIFIER"] },
+    $or: [
+      { declarationPerdueId: { $in: declarationIds } },
+      { declarationTrouveeId: { $in: declarationIds } },
+    ],
+  };
+  if (exclureId) filtre._id = { $ne: exclureId };
+
+  const aAnnuler = await Correspondance.find(filtre)
+    .populate("declarationPerdueId", "titre auteurId")
+    .populate("declarationTrouveeId", "titre auteurId");
+
+  if (aAnnuler.length === 0) return 0;
+
+  await Correspondance.updateMany(
+    { _id: { $in: aAnnuler.map((c) => c._id) } },
+    { $set: { statut: "REFUSEE", motifRefus: motif, dateMiseAJour: new Date() } },
+  );
+
+  // On prévient l'auteur de l'AUTRE déclaration (celle qui n'est pas concernée)
+  const notifications = [];
+  for (const c of aAnnuler) {
+    const perdue = c.declarationPerdueId;
+    const trouvee = c.declarationTrouveeId;
+    const autre = perdue && ids.includes(String(perdue._id)) ? trouvee : perdue;
+    if (!autre || !autre.auteurId) continue;
+
+    notifications.push({
+      utilisateurId: autre.auteurId,
+      titre: "Correspondance annulée",
+      message: `Une correspondance liée à votre déclaration "${autre.titre}" a été annulée. Motif : ${motif}`,
+      type: "CORRESPONDANCE_REFUSEE",
+    });
+  }
+  if (notifications.length > 0) {
+    await Notification.insertMany(notifications);
+  }
+
+  return aAnnuler.length;
+}
+
 // 1. GET /api/correspondances/:id — Consulter une correspondance
 async function getCorrespondanceById(req, res, next) {
   try {
@@ -337,23 +390,13 @@ async function accepterCorrespondance(req, res, next) {
       { $set: { statut: "EN_COURS", dateModification: maintenant } },
     );
 
-    const annulation = await Correspondance.updateMany(
-      {
-        _id: { $ne: corr._id },
-        statut: { $in: ["PROPOSEE", "A_VERIFIER"] },
-        $or: [
-          { declarationPerdueId: idPerdue },
-          { declarationTrouveeId: idTrouvee },
-        ],
-      },
-      {
-        $set: {
-          statut: "REFUSEE",
-          motifRefus: "Objet déjà attribué à une autre correspondance.",
-          dateMiseAJour: maintenant,
-        },
-      },
-    );
+    // Les autres demandes encore ouvertes sur ces 2 déclarations sont
+    // annulées et les personnes concernées sont prévenues
+    const demandesAnnulees = await annulerCorrespondancesOuvertes({
+      declarationIds: [idPerdue, idTrouvee],
+      exclureId: corr._id,
+      motif: "Objet déjà attribué à une autre correspondance.",
+    });
 
     const proprietaire = await Utilisateur.findById(
       corr.declarationPerdueId.auteurId,
@@ -389,7 +432,7 @@ async function accepterCorrespondance(req, res, next) {
       success: true,
       message: "Correspondance acceptée. L'objet est en cours de remise.",
       telephoneContact,
-      demandesAnnulees: annulation.modifiedCount,
+      demandesAnnulees,
       data: corr,
     });
   } catch (err) {
@@ -485,4 +528,5 @@ module.exports = {
   accepterCorrespondance,
   refuserCorrespondance,
   confirmerRestitution,
+  annulerCorrespondancesOuvertes,
 };

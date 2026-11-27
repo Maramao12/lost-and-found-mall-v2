@@ -142,9 +142,27 @@ async function lancerMatchingPourDeclaration(req, res, next) {
 }
 
 // GET /api/correspondances/declaration/:declarationId
+// Sécurité : réservée à l'auteur de la déclaration et à l'admin,
 async function getCorrespondancesParDeclaration(req, res, next) {
   try {
     const { declarationId } = req.params;
+
+    const declaration = await Declaration.findById(declarationId).select("auteurId");
+    if (!declaration) {
+      return res.status(404).json({
+        success: false,
+        message: "Déclaration introuvable.",
+      });
+    }
+
+    const estAuteur = String(declaration.auteurId) === String(req.user._id);
+    const estAdmin = req.user.role === "ADMIN";
+    if (!estAuteur && !estAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Accès refusé aux correspondances de cette déclaration.",
+      });
+    }
 
     const correspondances = await Correspondance.find({
       $or: [
@@ -152,6 +170,7 @@ async function getCorrespondancesParDeclaration(req, res, next) {
         { declarationTrouveeId: declarationId },
       ],
     })
+      .select("-preuveProprietaire -questionVerification -reponseVerification")
       .populate("declarationPerdueId", "titre description photoUrl statut")
       .populate("declarationTrouveeId", "titre description photoUrl statut")
       .populate("analyseId")
